@@ -5,12 +5,25 @@
    ))
 
 
+(defn links-list
+  []
+  (let [links (re-frame/subscribe [::subs/links])]
+    (fn []
+      [:ul
+       (map (fn [link]
+              [:li {:key (:id link)}
+               [:a {:href (:url link)} (:description link)]])
+              @links)])))
+
 ;; home
 
 (defn home-panel []
   (let [name (re-frame/subscribe [::subs/name])]
     [:div
      [:h1 (str "Hello from " @name ". This is the Home Page.")]
+
+     [:div
+      [links-list]]
 
      [:div
       [:a {:href "#/about"}

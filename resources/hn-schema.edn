@@ -1,0 +1,33 @@
+{:objects
+ {:Link
+  {:description "A link posted to Hacker News"
+   :fields
+   {:id {:type (non-null ID)}
+    :description {:type (non-null String)
+                  :description "Link description"}
+    :url {:type (non-null String)
+          :description "Link url"}}}}
+
+ :queries
+ {:info
+  {:type (non-null String)
+   :resolve :query/info}
+
+  :feed
+  {:type (list :Link)
+   :resolve :query/feed}}
+
+ :mutations
+ {:post
+  {:type (non-null :Link)
+   :description "Post a new Link"
+   :args
+   {
+    :url {:type (non-null String)
+          :description "Link url"}
+    :description {:type (non-null String)
+                  :description "Link description"}
+    }
+   :resolve :mutation/post!}}
+
+}
