@@ -2,13 +2,12 @@
   (:require
    [reagent.core :as reagent]
    [re-frame.core :as re-frame]
+   [re-graph.core :as re-graph]
    [hn-clj-pedestal-re-frame.events :as events]
    [hn-clj-pedestal-re-frame.routes :as routes]
    [hn-clj-pedestal-re-frame.views :as views]
-   [hn-clj-pedestal-re-frame.config :as config]
-   ))
-
-
+   [hn-clj-pedestal-re-frame.config :as config]))
+xs
 (defn dev-setup []
   (when config/debug?
     (enable-console-print!)
@@ -21,6 +20,10 @@
 
 (defn ^:export init []
   (routes/app-routes)
+  ;; initialise re-graph, including configuration options
+  (re-frame/dispatch [::re-graph/init
+                      {:ws-url                   nil
+                       :ws-reconnect-timeout     nil}])
   (re-frame/dispatch-sync [::events/initialize-db])
   (dev-setup)
   (mount-root))
