@@ -5,41 +5,35 @@
     [com.walmartlabs.lacinia.util :as util]
     [com.walmartlabs.lacinia.schema :as schema]
     [com.stuartsierra.component :as component]
-    [clojure.edn :as edn]))
-
-(def links (atom
-   [{:id "link-0"
-     :url "www.howtographql.com"
-     :description "Fullstack tutorial for GraphQL"}]))
+    [clojure.edn :as edn]
+    [hn-clj-pedestal-re-frame.db :as db]))
 
 (defn info [context arguments value]
     "This is the API of a Hackernews Clone")
 
-(defn feed [links-list context arguments value]
-    links-list)
+(defn feed
+  [db]
+  (fn [_ _ _]
+    (db/list-links db)))
 
-(defn post!
-  [links-list context arguments value]
-    (let [{:keys [url description]} arguments
-        counter (count links-list)
-        id (str "link-" counter)
-        link {:id id
-              :url url
-              :description description}]
-      (do
-        (conj links-list link)
-        link)))
+; (defn post!
+;  [links-list context arguments value]
+;    (let [{:keys [url description]} arguments
+;        counter (count links-list)
+;        id (str "link-" counter)
+;        link {:id id
+;              :url url
+;              :description description}]
+;      (do
+;        (conj links-list link)
+;        link)))
 
 (defn resolver-map
   [component]
-  (let [hn-data (-> (io/resource "hn-data.edn")
-                     slurp
-                     edn/read-string)
-        links-list (->> hn-data
-                        :links)]
+  (let [db (:db component)]
     {:query/info info
-     :query/feed (partial feed links-list)
-     :mutation/post! (partial post! links-list)}))
+     :query/feed (feed db)}))
+;     :mutation/post! (post! db)}))
 
 (defn load-schema
   [component]
@@ -61,4 +55,6 @@
 
 (defn new-schema-provider
   []
-  {:schema-provider (map->SchemaProvider {})})
+  {:schema-provider (-> {}
+                        map->SchemaProvider
+                        (component/using [:db]))})
