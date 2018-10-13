@@ -17,17 +17,17 @@
   {:type (list :Link)
    :resolve :query/feed}}
 
-; :mutations
-; {:post
-;  {:type (non-null :Link)
-;   :description "Post a new Link"
-;   :args
-;   {
-;    :url {:type (non-null String)
-;          :description "Link url"}
-;    :description {:type (non-null String)
-;                  :description "Link description"}
-;    }
-;   :resolve :mutation/post!}}
+ :mutations
+ {:post
+  {:type (non-null :Link)
+   :description "Post a new Link"
+   :args
+   {
+    :url {:type (non-null String)
+          :description "Link url"}
+    :description {:type (non-null String)
+                  :description "Link description"}
+    }
+   :resolve :mutation/post!}}
 
 }

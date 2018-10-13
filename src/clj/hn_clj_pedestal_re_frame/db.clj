@@ -27,3 +27,20 @@
        :data
        deref
        :links))
+
+(defn ^:private apply-link
+  [links link]
+  (cons link links))
+
+(defn insert-link
+  "Adds a new game rating, or changes the value of an existing game rating."
+  [db url description]
+  (let [counter (count (list-links db))
+        id (str "link-" counter)
+        link {:id id
+              :url url
+              :description description}]
+    (-> db
+        :data
+        (swap! update :links apply-link link))
+    link))

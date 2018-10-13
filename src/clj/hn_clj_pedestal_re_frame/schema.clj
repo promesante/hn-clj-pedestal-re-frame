@@ -16,24 +16,18 @@
   (fn [_ _ _]
     (db/list-links db)))
 
-; (defn post!
-;  [links-list context arguments value]
-;    (let [{:keys [url description]} arguments
-;        counter (count links-list)
-;        id (str "link-" counter)
-;        link {:id id
-;              :url url
-;              :description description}]
-;      (do
-;        (conj links-list link)
-;        link)))
+(defn post!
+  [db]
+  (fn [_ arguments _]
+    (let [{:keys [url description]} arguments]
+      (db/insert-link db url description))))
 
 (defn resolver-map
   [component]
   (let [db (:db component)]
     {:query/info info
-     :query/feed (feed db)}))
-;     :mutation/post! (post! db)}))
+     :query/feed (feed db)
+     :mutation/post! (post! db)}))
 
 (defn load-schema
   [component]
