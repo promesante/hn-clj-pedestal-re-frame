@@ -1,38 +1,29 @@
 (ns hn-clj-pedestal-re-frame.views
   (:require
    [re-frame.core :as re-frame]
-   [hn-clj-pedestal-re-frame.subs :as subs]
-   ))
+   [hn-clj-pedestal-re-frame.subs :as subs]))
 
-
-(defn links-list
-  []
+(defn links-panel []
   (let [links (re-frame/subscribe [::subs/links])]
-    (fn []
-      [:ul
-       (map (fn [link]
-              [:li {:key (:id link)}
-               [:a {:href (:url link)} (:description link)]])
-              @links)])))
+    [:div.flex.mt2.items-start
+      [:div.ml1
+        [:ul
+         (map (fn [link]
+                [:li {:key (:id link)}
+                 [:a {:href (:url link)} (:description link)]])
+              @links)]]]))
 
 ;; home
-
 (defn home-panel []
   (let [name (re-frame/subscribe [::subs/name])]
     [:div
      [:h1 (str "Hello from " @name ". This is the Home Page.")]
-
-     [:div
-      [links-list]]
-
      [:div
       [:a {:href "#/about"}
        "go to About Page"]]
      ]))
 
-
 ;; about
-
 (defn about-panel []
   [:div
    [:h1 "This is the About Page."]
@@ -41,11 +32,10 @@
     [:a {:href "#/"}
      "go to Home Page"]]])
 
-
 ;; main
-
 (defn- panels [panel-name]
   (case panel-name
+    :links-panel [links-panel]
     :home-panel [home-panel]
     :about-panel [about-panel]
     [:div]))
@@ -55,4 +45,5 @@
 
 (defn main-panel []
   (let [active-panel (re-frame/subscribe [::subs/active-panel])]
-    [show-panel @active-panel]))
+    [:div.ph3.pv1.background-gray
+     [show-panel @active-panel]]))
