@@ -8,7 +8,9 @@
 (re-frame/reg-event-db
   ::on-feed
   (fn [db [_ {:keys [data errors] :as payload}]]
-    (update db :links concat (:feed data))))
+    (-> db
+        (assoc :loading? false)
+        (assoc :links (:feed data)))))
 
 (re-frame/reg-event-db
   ::initialize-db
@@ -18,7 +20,36 @@
        "{ feed { id url description } }"
        {}
        [::on-feed]])
-    db/default-db))
+     (-> db
+         (assoc :loading? true)
+         (assoc :error false))))
+
+(re-frame/reg-event-db
+  ::on-create-link
+  (fn [db [_ {:keys [data errors] :as payload}]]
+    (-> db
+        (assoc :loading? false)
+        (assoc :link (:post data)))))
+
+(re-frame/reg-event-db
+  :create-link
+  (fn-traced [db  [_ description url]]
+    (re-frame/dispatch
+      [::re-graph/mutate
+       "post($url:String!, $description:String!) {
+          post(
+            url: $url,
+            description: $description
+          ) {
+            id
+          }
+        }"
+       {:url url
+        :description description}
+       [::on-create-link]])
+     (-> db
+         (assoc :loading? true)
+         (assoc :error false))))
 
 (re-frame/reg-event-db
  ::set-active-panel

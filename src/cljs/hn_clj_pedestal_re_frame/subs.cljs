@@ -1,4 +1,5 @@
 (ns hn-clj-pedestal-re-frame.subs
+  (:require-macros [reagent.ratom :refer [reaction]])
   (:require
    [re-frame.core :as re-frame]))
 
@@ -16,3 +17,13 @@
  ::links
  (fn [db]
    (:links db)))
+
+(re-frame/register-sub
+ :loading?
+ (fn [db]
+   (reaction (:loading? @db))))
+
+(re-frame/register-sub
+ :error?
+ (fn [db]
+   (reaction (:error @db))))

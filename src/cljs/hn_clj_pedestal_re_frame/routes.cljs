@@ -23,8 +23,11 @@
   (defroute "/" []
     (re-frame/dispatch [::events/set-active-panel :home-panel]))
 
-  (defroute "/links" []
-    (re-frame/dispatch [::events/set-active-panel :links-panel]))
+  (defroute "/link-list" []
+    (re-frame/dispatch [::events/set-active-panel :link-list-panel]))
+
+  (defroute "/link-create" []
+    (re-frame/dispatch [::events/set-active-panel :link-create-panel]))
 
   (defroute "/about" []
     (re-frame/dispatch [::events/set-active-panel :about-panel]))

@@ -3,5 +3,8 @@
 (def default-db
   {
    :name "re-frame"
+   :loading? false
+   :error false
    :links []
+   :link {}
    })

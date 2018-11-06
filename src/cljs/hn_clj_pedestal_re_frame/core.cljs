@@ -7,7 +7,7 @@
    [hn-clj-pedestal-re-frame.routes :as routes]
    [hn-clj-pedestal-re-frame.views :as views]
    [hn-clj-pedestal-re-frame.config :as config]))
-xs
+
 (defn dev-setup []
   (when config/debug?
     (enable-console-print!)
