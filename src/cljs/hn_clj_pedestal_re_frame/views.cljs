@@ -4,6 +4,14 @@
    [hn-clj-pedestal-re-frame.subs :as subs]
    [reagent.core :as reagent]))
 
+(defn header-panel []
+  [:div.flex.pa1.justify-between.nowrap.orange
+   [:div.flex.flex-fixed.black
+    [:div.fw7.mr1 "Hacker News"]
+    [:a.ml1.no-underline.black {:href "#/"} "new"]
+    [:div.ml1 "|"]
+    [:a.ml1.no-underline.black {:href "#/create"} "submit"]]])
+
 (defn link-list-panel []
   (let [links (re-frame/subscribe [::subs/links])]
     [:div
@@ -76,4 +84,5 @@
 (defn main-panel []
   (let [active-panel (re-frame/subscribe [::subs/active-panel])]
     [:div.ph3.pv1.background-gray
-     [show-panel @active-panel]]))
+      [header-panel]
+      [show-panel @active-panel]]))
