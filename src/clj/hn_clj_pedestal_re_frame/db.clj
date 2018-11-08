@@ -1,46 +1,44 @@
 (ns hn-clj-pedestal-re-frame.db
   (:require
-    [clojure.edn :as edn]
-    [clojure.java.io :as io]
-    [com.stuartsierra.component :as component]))
+    [com.stuartsierra.component :as component]
+    [clojure.java.jdbc :as jdbc])
+  (:import (com.mchange.v2.c3p0 ComboPooledDataSource)))
 
-(defrecord HackerNewsDb [data]
+(defn ^:private pooled-data-source
+  [host dbname user password port]
+  {:datasource
+   (doto (ComboPooledDataSource.)
+     (.setDriverClass "org.postgresql.Driver" )
+     (.setJdbcUrl (str "jdbc:postgresql://" host ":" port "/" dbname))
+     (.setUser user)
+     (.setPassword password))})
+
+(defrecord HackerNewsDb [ds]
 
   component/Lifecycle
 
   (start [this]
-    (assoc this :data (-> (io/resource "hn-data.edn")
-                          slurp
-                          edn/read-string
-                          atom)))
+    (assoc this
+           :ds (pooled-data-source "localhost" "hndb" "hn_role" "lacinia" 5432)))
 
   (stop [this]
-    (assoc this :data nil)))
+    (-> ds :datasource .close)
+    (assoc this :ds nil)))
 
 (defn new-db
   []
   {:db (map->HackerNewsDb {})})
 
 (defn list-links
-  [db]
-  (->> db
-       :data
-       deref
-       :links))
+  [component]
+    (jdbc/query (:ds component)
+       ["select id, description, url, created_at, updated_at from link"]))
+
+(defn insert-link
+  [component url description]
+  (jdbc/insert! (:ds component) :link
+                {:description description :url url}))
 
 (defn ^:private apply-link
   [links link]
   (cons link links))
-
-(defn insert-link
-  "Adds a new game rating, or changes the value of an existing game rating."
-  [db url description]
-  (let [counter (count (list-links db))
-        id (str "link-" counter)
-        link {:id id
-              :url url
-              :description description}]
-    (-> db
-        :data
-        (swap! update :links apply-link link))
-    link))
