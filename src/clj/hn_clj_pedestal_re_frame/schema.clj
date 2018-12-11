@@ -6,6 +6,7 @@
     [com.walmartlabs.lacinia.schema :as schema]
     [com.stuartsierra.component :as component]
     [clojure.edn :as edn]
+    [buddy.hashers :as hs]
     [hn-clj-pedestal-re-frame.db :as db]))
 
 (defn info [context arguments value]
@@ -22,12 +23,24 @@
     (let [{:keys [url description]} arguments]
       (db/insert-link db url description))))
 
+(defn signup!
+  [db]
+  (fn [_ arguments _]
+    (let [{:keys [email password name]} arguments
+          encrypted-password (hs/encrypt password)
+          result (db/insert-user db email encrypted-password name)]
+      (println (str "result: " result))
+      result
+      )))
+
 (defn resolver-map
   [component]
   (let [db (:db component)]
     {:query/info info
      :query/feed (feed db)
-     :mutation/post! (post! db)}))
+     :mutation/post! (post! db)
+     :mutation/signup! (signup! db)
+     }))
 
 (defn load-schema
   [component]

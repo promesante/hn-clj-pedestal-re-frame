@@ -3,9 +3,12 @@
    [com.walmartlabs.lacinia :as lacinia]
    [clojure.java.browse :refer [browse-url]]
    [hn-clj-pedestal-re-frame.system :as system]
+   [hn-clj-pedestal-re-frame.db :as db]
    [com.stuartsierra.component :as component]))
 
 (defonce system (system/new-system))
+
+; (defonce db (db/new-db))
 
 (defn q
   [query-string]
@@ -13,6 +16,13 @@
       :schema-provider
       :schema
       (lacinia/execute query-string nil nil)))
+
+(defonce db
+;  []
+  (-> system
+;      :schema-provider
+      :db))
+;      (lacinia/execute query-string nil nil)))
 
 (defn start
   []

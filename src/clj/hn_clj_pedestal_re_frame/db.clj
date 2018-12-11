@@ -1,7 +1,9 @@
 (ns hn-clj-pedestal-re-frame.db
   (:require
-    [com.stuartsierra.component :as component]
-    [clojure.java.jdbc :as jdbc])
+   [com.stuartsierra.component :as component]
+   [io.pedestal.log :as log]
+   [clojure.java.jdbc :as jdbc]
+   [clojure.string :as str])
   (:import (com.mchange.v2.c3p0 ComboPooledDataSource)))
 
 (defn ^:private pooled-data-source
@@ -29,15 +31,28 @@
   []
   {:db (map->HackerNewsDb {})})
 
+(defn ^:private query
+  [component statement]
+  (let [[sql & params] statement]
+    (log/debug :sql (str/replace sql #"\s+" " ")
+               :params params))
+  (jdbc/query (:ds component) statement))
+
 (defn list-links
   [component]
-    (jdbc/query (:ds component)
+  (query component
+;    (jdbc/query (:ds component)
        ["select id, description, url, created_at, updated_at from link"]))
 
 (defn insert-link
   [component url description]
   (jdbc/insert! (:ds component) :link
                 {:description description :url url}))
+
+(defn insert-user
+  [component email password name]
+  (jdbc/insert! (:ds component) :usr
+                {:email email :password password :name name}))
 
 (defn ^:private apply-link
   [links link]

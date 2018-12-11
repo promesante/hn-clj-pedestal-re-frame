@@ -6,7 +6,22 @@
     :description {:type (non-null String)
                   :description "Link description"}
     :url {:type (non-null String)
-          :description "Link url"}}}}
+          :description "Link url"}
+    }}
+
+  :User
+  {:description "User posting links to Hacker News"
+   :fields
+   {:id {:type (non-null ID)}
+    :name {:type (non-null String)
+           :description "User's name"}
+    :email {:type (non-null String)
+            :description "User's email"}
+    :password {:type (non-null String)
+               :description "User's password"}
+    }}
+
+  }
 
  :queries
  {:info
@@ -28,6 +43,22 @@
     :description {:type (non-null String)
                   :description "Link description"}
     }
-   :resolve :mutation/post!}}
+   :resolve :mutation/post!}
+
+  :signup
+  {:type (non-null :User)
+   :description "User registration"
+   :args
+   {
+    :email {:type (non-null String)
+            :description "User's email"}
+    :password {:type (non-null String)
+               :description "User's password"}
+    :name {:type (non-null String)
+           :description "User's name"}
+    }
+   :resolve :mutation/signup!}
+
+  }
 
 }
