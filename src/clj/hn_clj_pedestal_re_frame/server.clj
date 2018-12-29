@@ -24,14 +24,15 @@
         ext-routes (conj routes root-route)]
     (assoc service-map ::http/routes ext-routes)))
 
-(defrecord Server [schema-provider server]
+(defrecord Server [schema-provider server port]
 
   component/Lifecycle
   (start [this]
     (assoc this :server (-> schema-provider
                             :schema
                             (lp/service-map {:graphiql true
-                                             :ide-path "/graphiql"})
+                                             :ide-path "/graphiql"
+                                             :port port})
                             (merge {::http/resource-path "/public"})
                             (add-route)
                             http/create-server
@@ -43,5 +44,5 @@
 
 (defn new-server
   []
-  {:server (component/using (map->Server {})
+  {:server (component/using (map->Server {:port 8888})
                             [:schema-provider])})

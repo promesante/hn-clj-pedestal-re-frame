@@ -32,7 +32,7 @@
                    [day8.re-frame/re-frame-10x "0.3.3"]
                    [day8.re-frame/tracing "0.5.1"]
                    [figwheel-sidecar "0.5.16"]
-                   [cider/piggieback "0.3.5"]
+                   [cider/piggieback "0.3.7"]
                    [re-frisk "0.5.3"]]
 
     :plugins      [[lein-figwheel "0.5.16"]]}

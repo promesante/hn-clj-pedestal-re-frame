@@ -20,8 +20,10 @@
 (defn post!
   [db]
   (fn [_ arguments _]
-    (let [{:keys [url description]} arguments]
-      (db/insert-link db url description))))
+    (let [{:keys [url description]} arguments
+          result (db/insert-link db url description)
+          [first] result]
+      first)))
 
 (defn signup!
   [db]
