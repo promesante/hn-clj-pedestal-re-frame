@@ -18,12 +18,22 @@
  (fn [db]
    (:links db)))
 
-(re-frame/register-sub
+(re-frame/reg-sub
  :loading?
  (fn [db]
-   (reaction (:loading? @db))))
+   (:loading? db)))
 
-(re-frame/register-sub
+(re-frame/reg-sub
  :error?
  (fn [db]
-   (reaction (:error @db))))
+   (:error db)))
+
+; (re-frame/register-sub
+;  :loading?
+;  (fn [db]
+;    (reaction (:loading? @db))))
+
+; (re-frame/register-sub
+;  :error?
+;  (fn [db]
+;    (reaction (:error @db))))

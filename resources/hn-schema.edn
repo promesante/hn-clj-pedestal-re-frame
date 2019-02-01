@@ -7,6 +7,9 @@
                   :description "Link description"}
     :url {:type (non-null String)
           :description "Link url"}
+    :postedBy {:type :User
+               :description "User who posted this link"
+               :resolve :Link/user}
     }}
 
   :User
@@ -19,6 +22,18 @@
             :description "User's email"}
     :password {:type (non-null String)
                :description "User's password"}
+    :links {:type (list :Link)
+            :description "User's published links"
+            :resolve :User/links}
+    }}
+
+  :AuthPayload
+  {:description "Data returned by Login and Signup"
+   :fields
+   {:token {:type String
+            :description "User's token"}
+    :user {:type :User
+           :description "User's data"}
     }}
 
   }
@@ -46,7 +61,7 @@
    :resolve :mutation/post!}
 
   :signup
-  {:type (non-null :User)
+  {:type (non-null :AuthPayload)
    :description "User registration"
    :args
    {
@@ -58,6 +73,18 @@
            :description "User's name"}
     }
    :resolve :mutation/signup!}
+
+  :login
+  {:type :AuthPayload
+   :description "User login"
+   :args
+   {
+    :email {:type (non-null String)
+            :description "User's email"}
+    :password {:type (non-null String)
+               :description "User's password"}
+    }
+   :resolve :mutation/login!}
 
   }
 

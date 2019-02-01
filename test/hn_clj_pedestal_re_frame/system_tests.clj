@@ -47,3 +47,16 @@
                      :description "INIT - The best GraphQL client"}]}}
            results))
     (component/stop-system system)))
+
+(deftest can-write-user
+  (let [system (component/start-system (test-system))
+        results (q system
+                   "mutation { signup( email: \"lmrosso@hotmail.com\", password: \"password\", name: \"Luis\" ) { id }}"
+                   nil)]
+    (is (= {:data
+            {:feed [{:id "3",
+                     :url "https://macwright.org/2017/08/09/decentralize-ipfs.html",
+                     :description "So you want to decentralize your website with IPFS"}]}}
+           results))
+    (component/stop-system system)))
+

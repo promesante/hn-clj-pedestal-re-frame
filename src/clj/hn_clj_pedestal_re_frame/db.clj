@@ -42,12 +42,41 @@
   [component]
   (query component
 ;    (jdbc/query (:ds component)
-       ["select id, description, url, created_at, updated_at from link"]))
+       ["select id, description, url, usr_id, created_at, updated_at from link"]))
 
 (defn insert-link
-  [component url description]
+  [component url description usr-id]
   (jdbc/insert! (:ds component) :link
-                {:description description :url url}))
+                {:description description :url url :usr_id usr-id}))
+
+(defn find-user-by-email
+  [component email]
+  (first
+    (jdbc/query (:ds component)
+                ["select id, name, email, password, created_at, updated_at
+                  from usr where email = ?" email])))
+
+(defn find-user-by-link
+  [component link-id]
+  (println (str "find-user-by-link - link-id: " link-id))
+  (first
+   (jdbc/query (:ds component)
+                ["select u.id, u.name, u.email, u.password, u.created_at, u.updated_at
+                  from link l
+                  inner join usr u
+                  on (l.usr_id = u.id)
+                  where l.id = ?" link-id])))
+
+(defn find-links-by-user
+  [component user-id]
+  (println (str "find-links-by-user - user-id: " user-id))
+;  (first
+   (jdbc/query (:ds component)
+                ["select l.id, l.description, l.url, l.usr_id, l.created_at, l.updated_at
+                  from link l
+                  inner join usr u
+                  on (l.usr_id = u.id)
+                  where u.id = ?" user-id]))
 
 (defn insert-user
   [component email password name]

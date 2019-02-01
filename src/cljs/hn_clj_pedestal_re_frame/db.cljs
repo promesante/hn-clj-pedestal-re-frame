@@ -7,4 +7,5 @@
    :error false
    :links []
    :link {}
+   :auth {}
    })

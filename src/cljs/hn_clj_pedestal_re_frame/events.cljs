@@ -2,8 +2,9 @@
   (:require
    [re-frame.core :as re-frame]
    [re-graph.core :as re-graph]
-   [hn-clj-pedestal-re-frame.db :as db]
-   [day8.re-frame.tracing :refer-macros [fn-traced defn-traced]]))
+   [day8.re-frame.tracing :refer-macros [fn-traced defn-traced]]
+   [hodgepodge.core :refer [local-storage set-item remove-item]]
+   [hn-clj-pedestal-re-frame.db :as db]))
 
 (re-frame/reg-event-db
   ::on-feed
@@ -47,6 +48,69 @@
        {:url url
         :description description}
        [::on-create-link]])
+     (-> db
+         (assoc :loading? true)
+         (assoc :error false))))
+
+(re-frame/reg-event-db
+  ::on-signup
+  (fn [db [_ {:keys [data errors] :as payload}]]
+    (re-frame/dispatch [::set-active-panel :link-list-panel])
+    (let [token (get-in data [:signup :token])]
+      (set-item local-storage "token" token)
+      (-> db
+          (assoc :loading? false)
+          (assoc :token token)))))
+
+(re-frame/reg-event-db
+  :signup
+  (fn-traced [db  [_ name email password]]
+    (re-frame/dispatch
+      [::re-graph/mutate
+       "signup($email:String!, $password:String!, $name:String!) {
+          signup(
+            email: $email,
+            password: $password,
+            name: $name
+          ) {
+            token
+          }
+        }"
+       {:email email
+        :password password
+        :name name}
+       [::on-signup]])
+     (-> db
+         (assoc :loading? true)
+         (assoc :error false))))
+
+(re-frame/reg-event-db
+  ::on-login
+  (fn [db [_ {:keys [data errors] :as payload}]]
+    (re-frame/dispatch [::set-active-panel :link-list-panel])
+    (let [token (get-in data [:login :token])]
+      (set-item local-storage "token" token)
+      (-> db
+          (assoc :loading? false)
+          (assoc :token token)))))
+
+(re-frame/reg-event-db
+  :login
+  (fn-traced [db  [_ email password]]
+    (re-frame/dispatch
+      [::re-graph/mutate
+       "login($email:String!, $password:String!) {
+          login(
+            email: $email,
+            password: $password
+          ) {
+            token
+          }
+        }"
+       {:email email
+        :password password
+        }
+       [::on-login]])
      (-> db
          (assoc :loading? true)
          (assoc :error false))))

@@ -21,15 +21,16 @@
   ;; --------------------
   ;; define routes here
   (defroute "/" []
-;    (re-frame/dispatch [::events/set-active-panel :home-panel]))
-;  (defroute "/link-list" []
     (re-frame/dispatch [::events/set-active-panel :link-list-panel]))
 
   (defroute "/create" []
     (re-frame/dispatch [::events/set-active-panel :link-create-panel]))
 
-;  (defroute "/about" []
-;    (re-frame/dispatch [::events/set-active-panel :about-panel]))
+  (defroute "/signup" []
+    (re-frame/dispatch [::events/set-active-panel :signup-panel]))
+
+  (defroute "/login" []
+    (re-frame/dispatch [::events/set-active-panel :login-panel]))
 
   ;; --------------------
   (hook-browser-navigation!))

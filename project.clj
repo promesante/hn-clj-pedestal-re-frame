@@ -7,12 +7,13 @@
                  [org.postgresql/postgresql "42.2.5.jre7"]
                  [com.mchange/c3p0 "0.9.5.2"]
                  [io.aviso/logging "0.3.1"]
+                 [buddy/buddy-sign "2.1.0"]
+                 [buddy/buddy-hashers "1.3.0"]
+                 [hodgepodge "0.1.3"]
                  [reagent "0.7.0"]
                  [re-frame "0.10.5"]
                  [secretary "1.2.3"]
-                 [re-graph "0.1.5"]
-                 [buddy/buddy-sign "0.3.0"]
-                 [buddy/buddy-hashers "0.3.0"]]
+                 [re-graph "0.1.5"]]
 
   :plugins [[lein-cljsbuild "1.1.7"]]
 
@@ -32,6 +33,7 @@
                    [day8.re-frame/re-frame-10x "0.3.3"]
                    [day8.re-frame/tracing "0.5.1"]
                    [figwheel-sidecar "0.5.16"]
+                   [cider/cider-nrepl "0.16.0"]
                    [cider/piggieback "0.3.7"]
                    [re-frisk "0.5.3"]]
 
