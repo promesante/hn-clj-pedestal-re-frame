@@ -9,6 +9,7 @@
                  [io.aviso/logging "0.3.1"]
                  [buddy/buddy-sign "2.1.0"]
                  [buddy/buddy-hashers "1.3.0"]
+                 [reagi "0.10.1"]
                  [hodgepodge "0.1.3"]
                  [reagent "0.7.0"]
                  [re-frame "0.10.5"]

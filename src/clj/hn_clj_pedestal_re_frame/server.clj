@@ -32,7 +32,10 @@
                             :schema
                             (lp/service-map {:graphiql true
                                              :ide-path "/graphiql"
-                                             :port port})
+                                             :port port
+                                             :subscriptions true
+                                             ; :subscriptions-path "/ws"
+                                             })
                             (merge {::http/resource-path "/public"})
                             (add-route)
                             http/create-server

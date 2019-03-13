@@ -10,9 +10,12 @@
     [buddy.hashers :as hs]
     [buddy.sign.jwt :as jwt]
     [io.pedestal.log :as log]
+    [reagi.core :as r]
     [hn-clj-pedestal-re-frame.db :as db]))
 
 (def jwt-secret "GraphQL-is-aw3some")
+
+(def e (r/events))
 
 (defn info [context arguments value]
     "This is the API of a Hackernews Clone")
@@ -44,7 +47,9 @@
           usr-id (get-user-id context)
           result (db/insert-link db url description usr-id)
           [first] result]
-      first)))
+      (r/deliver e first)
+      first)
+    ))
 
 (defn signup!
   [db]
@@ -68,6 +73,25 @@
         (log/info :error "Wrong password"))
        (log/info :error "User not found"))))
 
+(defn vote!
+  [db]
+  (fn [context arguments _]
+    (let [{link-id :link_id} arguments
+          usr-id (get-user-id context)
+          votes (db/find-votes-by-link-usr db link-id usr-id)
+          no-votes? (empty? votes)]
+      (println (str "vote - link-id: " link-id))
+      (println (str "vote - usr-id: " usr-id))
+      (println (str "vote - no-votes: " no-votes?))
+      (if no-votes?
+;      (if (db/find-vote-by-link-usr db link-id usr-id)
+        (let [result (db/insert-vote db link-id usr-id)]
+          (println (str "vote - result: " result))
+          result)
+;        (db/insert-vote db link-id usr-id)
+        (log/info :error "User's already voted for this same link")
+        ))))
+
 (defn link-user
   [db]
   (fn [_ _ link]
@@ -78,6 +102,17 @@
   (fn [_ _ user]
     (db/find-links-by-user db (:id user))))
 
+(defn link-votes
+  [db]
+  (fn [_ _ link]
+    (db/find-votes-by-link db (:id link))))
+
+(defn new-link
+  [db]
+  (fn [context args source-stream]
+    (let [new-link @e]
+      (source-stream new-link))))
+
 (defn resolver-map
   [component]
   (let [db (:db component)]
@@ -86,9 +121,15 @@
      :mutation/post! (post! db)
      :mutation/signup! (signup! db)
      :mutation/login! (login! db)
+     :mutation/vote! (vote! db)
      :Link/user (link-user db)
-     :User/links (user-links db)
-     }))
+     :Link/votes (link-votes db)
+     :User/links (user-links db)}))
+
+(defn streamer-map
+  [component]
+  (let [db (:db component)]
+    {:subscription/newLink (new-link db)}))
 
 (defn load-schema
   [component]
@@ -96,6 +137,7 @@
       slurp
       edn/read-string
       (util/attach-resolvers (resolver-map component))
+      (util/attach-streamers (streamer-map component))
       schema/compile))
 
 (defrecord SchemaProvider [schema]

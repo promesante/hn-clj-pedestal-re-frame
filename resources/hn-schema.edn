@@ -10,7 +10,11 @@
     :postedBy {:type :User
                :description "User who posted this link"
                :resolve :Link/user}
-    }}
+    :votes {:type (list :Vote)
+            :description "Link's votes"
+            :resolve :Link/votes}
+    }
+   }
 
   :User
   {:description "User posting links to Hacker News"
@@ -34,6 +38,16 @@
             :description "User's token"}
     :user {:type :User
            :description "User's data"}
+    }}
+
+  :Vote
+  {:description "A vote for a link submitted to Hacker News"
+   :fields
+   {:id {:type (non-null ID)}
+    :link {:type :Link
+           :description "Voted link"}
+    :user {:type :User
+           :description "Voting user"}
     }}
 
   }
@@ -86,6 +100,22 @@
     }
    :resolve :mutation/login!}
 
+  :vote
+  {:type :Vote
+   :description "User voting"
+   :args
+   {
+    :link_id {:type (non-null ID)
+              :description "User's email"}
+    }
+   :resolve :mutation/vote!}
+
+  }
+
+  :subscriptions
+ {:newLink
+  {:type :Link
+   :stream :subscription/newLink}
   }
 
 }
