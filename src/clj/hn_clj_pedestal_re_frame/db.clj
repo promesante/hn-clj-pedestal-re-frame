@@ -1,4 +1,4 @@
-(ns hn-clj-pedestal-re-frame.db-yesql
+(ns hn-clj-pedestal-re-frame.db
   (:require
    [com.stuartsierra.component :as component]
    [yesql.core :as yesql])

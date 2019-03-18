@@ -1,4 +1,4 @@
-(ns hn-clj-pedestal-re-frame.schema-yesql
+(ns hn-clj-pedestal-re-frame.schema
   "Contains custom resolvers and a function to provide the full schema."
   (:require
     [clojure.java.io :as io]
@@ -49,7 +49,7 @@
           usr-id (get-user-id context)
           result (sql/insert-link<! {:? [usr-id]
                                      :description description
-                                     :url url)
+                                     :url url}
                                     db)
           [first] result]
       (r/deliver link-events first)
