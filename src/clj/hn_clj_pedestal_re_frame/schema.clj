@@ -1,4 +1,4 @@
-(ns hn-clj-pedestal-re-frame.schema
+(ns hn-clj-pedestal-re-frame.schema-yesql
   "Contains custom resolvers and a function to provide the full schema."
   (:require
     [clojure.java.io :as io]
@@ -11,11 +11,13 @@
     [buddy.sign.jwt :as jwt]
     [io.pedestal.log :as log]
     [reagi.core :as r]
-    [hn-clj-pedestal-re-frame.db :as db]))
+    [hn-clj-pedestal-re-frame.db :as db]
+    [hn-clj-pedestal-re-frame.sql :as sql]))
 
 (def jwt-secret "GraphQL-is-aw3some")
 
-(def e (r/events))
+(def link-events (r/events))
+(def vote-events (r/events))
 
 (defn info [context arguments value]
     "This is the API of a Hackernews Clone")
@@ -38,26 +40,30 @@
 (defn feed
   [db]
   (fn [_ _ _]
-      (db/list-links db)))
+      (sql/list-links {} db)))
 
 (defn post!
   [db]
   (fn [context arguments _]
     (let [{:keys [url description]} arguments
           usr-id (get-user-id context)
-          result (db/insert-link db url description usr-id)
+          result (sql/insert-link<! {:? [usr-id]
+                                     :description description
+                                     :url url)
+                                    db)
           [first] result]
-      (r/deliver e first)
-      first)
-    ))
+      (r/deliver link-events first)
+      first)))
 
 (defn signup!
   [db]
   (fn [_ arguments _]
     (let [{:keys [email password name]} arguments
           encrypted-password (hs/derive password)
-          result (db/insert-user db email encrypted-password name)
-          [user] result
+          user (sql/insert-user<! {:email email
+                                   :password encrypted-password
+                                   :name name}
+                                  db)
           token (jwt/sign {:user-id (:id user)} jwt-secret)]
       {:token token
        :user user})))
@@ -65,7 +71,7 @@
 (defn login!
   [db]
   (fn [_ arguments _]
-    (if-let [user (db/find-user-by-email db (:email arguments))]
+    (if-let [user (sql/find-user-by-email {:email (:email arguments)} db)]
       (if-let [valid (hs/check (:password arguments) (:password user))]
         (let [token (jwt/sign {:user-id (:id user)} jwt-secret)]
           {:token token
@@ -78,40 +84,44 @@
   (fn [context arguments _]
     (let [{link-id :link_id} arguments
           usr-id (get-user-id context)
-          votes (db/find-votes-by-link-usr db link-id usr-id)
-          no-votes? (empty? votes)]
-      (println (str "vote - link-id: " link-id))
-      (println (str "vote - usr-id: " usr-id))
-      (println (str "vote - no-votes: " no-votes?))
-      (if no-votes?
-;      (if (db/find-vote-by-link-usr db link-id usr-id)
-        (let [result (db/insert-vote db link-id usr-id)]
-          (println (str "vote - result: " result))
-          result)
-;        (db/insert-vote db link-id usr-id)
-        (log/info :error "User's already voted for this same link")
-        ))))
+          votes (sql/find-votes-by-link-usr {:? [link-id usr-id]} db)]
+      (if (empty? votes)
+        (let [result (sql/insert-vote<! {:? [link-id usr-id]} db)
+              link (first (sql/find-link-by-id {:? [(:link_id result)]} db))
+              user (first (sql/find-user-by-id {:? [(:usr_id result)]} db))
+              vote {:id (:id result)
+                    :link link
+                    :user user}]
+          (r/deliver vote-events vote)
+          vote)
+        (log/info :error "User's already voted for this same link")))))
 
 (defn link-user
   [db]
   (fn [_ _ link]
-    (db/find-user-by-link db (:id link))))
+    (sql/find-user-by-link {:? [(:id link)]} db)))
 
 (defn user-links
   [db]
   (fn [_ _ user]
-    (db/find-links-by-user db (:id user))))
+    (sql/find-links-by-user {:user_id (:id user)} db)))
 
 (defn link-votes
   [db]
   (fn [_ _ link]
-    (db/find-votes-by-link db (:id link))))
+    (sql/find-votes-by-link {:? [(:id link)]} db)))
 
 (defn new-link
   [db]
   (fn [context args source-stream]
-    (let [new-link @e]
+    (let [new-link @link-events]
       (source-stream new-link))))
+
+(defn new-vote
+  [db]
+  (fn [context args source-stream]
+    (let [new-vote @vote-events]
+      (source-stream new-vote))))
 
 (defn resolver-map
   [component]
@@ -127,9 +137,10 @@
      :User/links (user-links db)}))
 
 (defn streamer-map
-  [component]
+ [component]
   (let [db (:db component)]
-    {:subscription/newLink (new-link db)}))
+    {:subscription/new-link (new-link db)
+     :subscription/new-vote (new-vote db)}))
 
 (defn load-schema
   [component]
@@ -141,7 +152,7 @@
       schema/compile))
 
 (defrecord SchemaProvider [schema]
-
+  
   component/Lifecycle
 
   (start [this]

@@ -109,13 +109,17 @@
               :description "User's email"}
     }
    :resolve :mutation/vote!}
-
   }
 
   :subscriptions
- {:newLink
+ {
+  :newLink
   {:type :Link
-   :stream :subscription/newLink}
+   :stream :subscription/new-link}
+
+  :newVote
+  {:type :Vote
+   :stream :subscription/new-vote}
   }
 
 }
