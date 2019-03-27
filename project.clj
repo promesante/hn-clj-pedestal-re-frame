@@ -8,6 +8,7 @@
                  [io.aviso/logging "0.3.1"]
                  [buddy/buddy-sign "2.1.0"]
                  [buddy/buddy-hashers "1.3.0"]
+                 [com.andrewmcveigh/cljs-time "0.5.2"]
                  [reagi "0.10.1"]
                  [yesql "0.5.3"]
                  [hodgepodge "0.1.3"]

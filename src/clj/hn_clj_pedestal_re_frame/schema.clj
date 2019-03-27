@@ -40,7 +40,8 @@
 (defn feed
   [db]
   (fn [_ _ _]
-      (sql/list-links {} db)))
+    (let [links (sql/list-links {} db)]
+      links)))
 
 (defn post!
   [db]
@@ -66,12 +67,13 @@
                                   db)
           token (jwt/sign {:user-id (:id user)} jwt-secret)]
       {:token token
-       :user user})))
+       :user user}
+      )))
 
 (defn login!
   [db]
   (fn [_ arguments _]
-    (if-let [user (sql/find-user-by-email {:email (:email arguments)} db)]
+    (if-let [user (first (sql/find-user-by-email {:email (:email arguments)} db))]
       (if-let [valid (hs/check (:password arguments) (:password user))]
         (let [token (jwt/sign {:user-id (:id user)} jwt-secret)]
           {:token token
@@ -99,17 +101,26 @@
 (defn link-user
   [db]
   (fn [_ _ link]
-    (sql/find-user-by-link {:? [(:id link)]} db)))
+    (first (sql/find-user-by-link {:? [(:id link)]} db))))
 
 (defn user-links
   [db]
   (fn [_ _ user]
-    (sql/find-links-by-user {:user_id (:id user)} db)))
+    (sql/find-links-by-user {:? [(:id user)]} db)))
 
 (defn link-votes
   [db]
   (fn [_ _ link]
-    (sql/find-votes-by-link {:? [(:id link)]} db)))
+    (let [link-id (:id link)
+          votes (sql/find-votes-by-link {:? [link-id]} db)]
+      (map (fn [vote]
+             (let [{:keys [id usr_id name email]} vote]
+                   {:id id
+                    :link link
+                    :user {:id usr_id
+                           :name name
+                           :email email}}))
+           votes))))
 
 (defn new-link
   [db]

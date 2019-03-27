@@ -3,13 +3,15 @@
   {:description "A link posted to Hacker News"
    :fields
    {:id {:type (non-null ID)}
+    :created_at {:type (non-null String)
+                 :description "Link creation datetime"}
     :description {:type (non-null String)
                   :description "Link description"}
     :url {:type (non-null String)
           :description "Link url"}
-    :postedBy {:type :User
-               :description "User who posted this link"
-               :resolve :Link/user}
+    :posted_by {:type :User
+                :description "User who posted this link"
+                :resolve :Link/user}
     :votes {:type (list :Vote)
             :description "Link's votes"
             :resolve :Link/votes}
@@ -29,7 +31,8 @@
     :links {:type (list :Link)
             :description "User's published links"
             :resolve :User/links}
-    }}
+    }
+   }
 
   :AuthPayload
   {:description "Data returned by Login and Signup"
@@ -48,7 +51,8 @@
            :description "Voted link"}
     :user {:type :User
            :description "Voting user"}
-    }}
+    }
+   }
 
   }
 

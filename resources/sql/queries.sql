@@ -25,8 +25,7 @@ where link_id = ?::integer
 and usr_id = ?::integer
 
 -- name: find-user-by-link
-select
-u.id, u.name, u.email, u.password, u.created_at, u.updated_at
+select u.id, u.name, u.email, u.password, u.created_at, u.updated_at
 from link l
 inner join usr u
 on (l.usr_id = u.id)
@@ -41,8 +40,9 @@ where u.id = ?::integer
 
 -- name: find-votes-by-link
 select
+v.id,
 u.id as usr_id, u.name, u.email, u.password,
-u.created_at as usr_created_at, u.updated_at as usr_updated_at
+u.created_at, u.updated_at
 from vote v
 inner join link l on (v.link_id = l.id)
 inner join usr u on (v.usr_id = u.id)

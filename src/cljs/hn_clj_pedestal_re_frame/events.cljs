@@ -4,6 +4,7 @@
    [re-graph.core :as re-graph]
    [day8.re-frame.tracing :refer-macros [fn-traced defn-traced]]
    [hodgepodge.core :refer [local-storage set-item remove-item]]
+   [cljs-time.format :as format]
    [hn-clj-pedestal-re-frame.db :as db]))
 
 (re-frame/reg-event-db
@@ -14,11 +15,28 @@
         (assoc :links (:feed data)))))
 
 (re-frame/reg-event-db
-  ::initialize-db
+ ::initialize-db
   (fn-traced [db  [_ _]]
     (re-frame/dispatch
       [::re-graph/query
-       "{ feed { id url description } }"
+       "{
+          feed {
+            id
+            created_at
+            url
+            description
+            posted_by {
+              id
+              name
+            }
+              votes {
+                id
+                user {
+                  id
+                }
+              }
+            }
+       }"
        {}
        [::on-feed]])
      (-> db

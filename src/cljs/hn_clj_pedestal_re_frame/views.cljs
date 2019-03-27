@@ -3,7 +3,8 @@
    [reagent.core :as reagent]
    [re-frame.core :as re-frame]
    [hodgepodge.core :refer [local-storage get-item remove-item]]
-   [hn-clj-pedestal-re-frame.subs :as subs]))
+   [hn-clj-pedestal-re-frame.subs :as subs]
+   [hn-clj-pedestal-re-frame.utils :as utils]))
 
 (defn header-panel []
   (let [loading? (re-frame/subscribe [:loading?])
@@ -26,14 +27,27 @@
        label]]]))
 
 (defn link-list-panel []
-  (let [links (re-frame/subscribe [::subs/links])]
+  (let [links (re-frame/subscribe [::subs/links])
+        token (reagent/atom (get-item local-storage "token" "empty"))]
     [:div
-      (map (fn [link]
-        (let [{:keys [id description url]} link]
-          [:div.flex.mt2.items-start {:key id}
-           [:div.ml1
-             [:div (str description " (" url ")")]]]))
-                @links)]))
+     (map-indexed
+      (fn [idx link]
+        (let [{:keys [id created_at description url posted_by votes]} link
+              time-difference (utils/time-diff-for-date created_at)]
+               [:div.flex.mt2.items-start
+                [:div.flex.items-center
+                 [:span.gray (str (inc idx) ".")]
+                 (when (not (= @token "empty"))
+                   [:div.f6.lh-copy.gray "▲"])
+                 [:div.ml1
+                  [:div (str description " (" url ")")]
+                  [:div.f6.lh-copy.gray
+                   (str (count votes)
+                        " votes | by "
+                        (:name posted_by)
+                        " "
+                        time-difference)]]]]))
+           @links)]))
 
 (defn link-create-panel []
   (let [loading? (re-frame/subscribe [:loading?])
@@ -97,10 +111,12 @@
         [:span.input-group-btn
          (if @login
            [:button.btn.btn-default {:type "button"
-                                     :on-click #(when-not @loading? (on-click-login %))}
+                                     :on-click #(when-not @loading?
+                                                  (on-click-login %))}
                                      "login"]
            [:button.btn.btn-default {:type "button"
-                                     :on-click #(when-not @loading? (on-click-signup %))}
+                                     :on-click #(when-not @loading?
+                                                  (on-click-signup %))}
                                      "create account"])
          [:button.btn.btn-default {:type "button"
                                    :on-click #(swap! login not)}
