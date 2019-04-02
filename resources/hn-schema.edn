@@ -54,15 +54,40 @@
     }
    }
 
+  :Feed
+  {:description "Object holding returned filtered, paginated linkes, and their count"
+   :fields
+   {:links {:type (non-null (list (non-null :Link)))
+            :description "Filtered, paginated linkes"}
+    :count {:type (non-null Int)}}
+   }
+
   }
 
+  :enums
+  {:LinkOrderByInput
+   {:description "Combination of field and criteria for Link sorting"
+    :values
+    [:DESCRIPTION_ASC :DESCRIPTION_DESC
+     :URL_ASC :URL_DESC
+     :CREATED_AT_ASC :CREATED_AT_DESC]
+    }
+   }
+ 
  :queries
  {:info
   {:type (non-null String)
    :resolve :query/info}
 
   :feed
-  {:type (list :Link)
+  {:type (non-null Feed)
+   :args
+   {
+    :filter {:type String}
+    :skip {:type Int}
+    :first {:type Int}
+    ; :order_by {:type :LinkOrderByInput}
+    }
    :resolve :query/feed}}
 
  :mutations

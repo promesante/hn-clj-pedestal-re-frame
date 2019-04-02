@@ -14,8 +14,8 @@ offset ?::integer
 -- name: filter-links-count
 select count(*)
 from link
--- where description like :filter
--- or url like :filter
+where description like :filter
+or url like :filter
 
 -- name: filter-links-order
 select id, description, url, usr_id, created_at, updated_at

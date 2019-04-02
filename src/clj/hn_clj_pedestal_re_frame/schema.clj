@@ -15,6 +15,7 @@
     [hn-clj-pedestal-re-frame.sql :as sql]))
 
 (def jwt-secret "GraphQL-is-aw3some")
+(def links-per-page 100)
 
 (def link-events (r/events))
 (def vote-events (r/events))
@@ -37,11 +38,54 @@
           user-id (:user-id tuple)]
       user-id))
 
+(defn parse-order
+  [input-key]
+  (let [input-str (name input-key)
+        input-list (string/split input-str #"_")
+        criteria (nth input-list (dec (count input-list)))
+        field (string/join "_" (drop-last input-list))
+        order {:field field
+               :criteria criteria}]
+    order))
+
 (defn feed
   [db]
-  (fn [_ _ _]
-    (let [links (sql/list-links {} db)]
-      links)))
+  (fn [_ args _]
+    (let [{:keys [filter skip first]} args
+          fltr (if (nil? filter) "" filter)
+          skp (if (nil? skip) 0 skip)
+          frst (if (nil? first) links-per-page first)
+          result (sql/filter-links-count {:filter (str "%" fltr "%")} db)
+          [first] result
+          count (:count first)
+          links (sql/filter-links {:? [frst skp]
+                                   :filter (str "%" fltr "%" )}
+                                  db)
+          feed {:links links
+                :count count}]
+      feed)))
+
+;; not able to implement order_by with yesql yet
+;; TODO: to be done whan adopting HoneySQL
+(defn _feed
+  [db]
+  (fn [_ args _]
+    (let [{:keys [filter skip first order_by]} args
+          skp (when (nil? skip) 0)
+          frst (when (nil? first) links-per-page)]
+      (if (nil? order_by)
+        (let [links (sql/filter-links {:? [frst skp]
+                                       :filter (str "%" filter "%" )}
+                                      db)]
+          links)
+        (let [order (parse-order order_by)
+              {:keys [field criteria]} order
+              links (sql/filter-links-order {:? [frst skp]
+                                             :filter (str "%" filter "%" )
+                                             :field field
+                                             :criteria criteria}
+                                            db)]
+          links)))))
 
 (defn post!
   [db]
