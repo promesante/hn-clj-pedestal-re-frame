@@ -53,13 +53,14 @@
   (fn [_ args _]
     (let [{:keys [filter skip first]} args
           fltr (if (nil? filter) "" filter)
+          fltr-sql (str "%" fltr "%" )
           skp (if (nil? skip) 0 skip)
           frst (if (nil? first) links-per-page first)
-          result (sql/filter-links-count {:filter (str "%" fltr "%")} db)
+          result (sql/filter-links-count {:filter fltr-sql} db)
           [first] result
           count (:count first)
           links (sql/filter-links {:? [frst skp]
-                                   :filter (str "%" fltr "%" )}
+                                   :filter fltr-sql}
                                   db)
           feed {:links links
                 :count count}]

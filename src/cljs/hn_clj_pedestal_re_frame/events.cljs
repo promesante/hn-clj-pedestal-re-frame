@@ -8,11 +8,17 @@
    [hn-clj-pedestal-re-frame.db :as db]))
 
 (re-frame/reg-event-db
+ ::set-active-panel
+ (fn-traced [db [_ active-panel]]
+   (assoc db :active-panel active-panel)))
+
+(re-frame/reg-event-db
   ::on-feed
   (fn [db [_ {:keys [data errors] :as payload}]]
-    (-> db
-        (assoc :loading? false)
-        (assoc :links (:feed data)))))
+    (let [links (get-in data [:feed :links])]
+      (-> db
+          (assoc :loading? false)
+          (assoc :links links)))))
 
 (re-frame/reg-event-db
  ::initialize-db
@@ -21,14 +27,15 @@
       [::re-graph/query
        "{
           feed {
-            id
-            created_at
-            url
-            description
-            posted_by {
+            links {
               id
-              name
-            }
+              created_at
+              url
+              description
+              posted_by {
+                id
+                name
+              }
               votes {
                 id
                 user {
@@ -36,6 +43,7 @@
                 }
               }
             }
+          }
        }"
        {}
        [::on-feed]])
@@ -134,6 +142,40 @@
          (assoc :error false))))
 
 (re-frame/reg-event-db
- ::set-active-panel
- (fn-traced [db [_ active-panel]]
-   (assoc db :active-panel active-panel)))
+  ::on-search-links
+  (fn [db [_ {:keys [data errors] :as payload}]]
+    (let [links (get-in data [:feed :links])]
+      (-> db
+          (assoc :loading? false)
+          (assoc :search-links links)))))
+
+(re-frame/reg-event-db
+ :search-links
+  (fn-traced [db  [_ filter]]
+    (re-frame/dispatch
+      [::re-graph/query
+       "FeedSearchQuery($filter: String!) {
+          feed(filter: $filter) {
+            links {
+              id
+              url
+              description
+              created_at
+              posted_by {
+                id
+                name
+              }
+              votes {
+                id
+                user {
+                  id
+                }
+              }
+            }
+          }
+       }"
+       {:filter filter}
+       [::on-search-links]])
+     (-> db
+         (assoc :loading? true)
+         (assoc :error false))))

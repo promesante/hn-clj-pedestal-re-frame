@@ -19,6 +19,11 @@
    (:links db)))
 
 (re-frame/reg-sub
+ ::search-links
+ (fn [db]
+   (:search-links db)))
+
+(re-frame/reg-sub
  :loading?
  (fn [db]
    (:loading? db)))

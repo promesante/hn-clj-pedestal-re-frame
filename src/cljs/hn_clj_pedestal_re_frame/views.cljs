@@ -19,6 +19,8 @@
       [:div.fw7.mr1 "Hacker News"]
       [:a.ml1.no-underline.black {:href "#/"} "new"]
       [:div.ml1 "|"]
+      [:a.ml1.no-underline.black {:href "#/search"} "search"]
+      [:div.ml1 "|"]
       [:a.ml1.no-underline.black {:href "#/create"} "submit"]]
      [:div.flex.flex-fixed
       [:a.ml1.no-underline.black
@@ -26,28 +28,50 @@
         :on-click #(when-not @loading? (on-click %))}
        label]]]))
 
+(defn link-record
+  [token]
+  (fn [idx link]
+    (let [{:keys [id created_at description url posted_by votes]} link
+          time-diff (utils/time-diff-for-date created_at)]
+      [:div.flex.mt2.items-start
+       [:div.flex.items-center
+        [:span.gray (str (inc idx) ".")]
+        (when (not (= token "empty"))
+          [:div.f6.lh-copy.gray "▲"])
+        [:div.ml1
+         [:div (str description " (" url ")")]
+         [:div.f6.lh-copy.gray
+          (str (count votes) " votes | by " (:name posted_by) " " time-diff)]]]])))
+
 (defn link-list-panel []
   (let [links (re-frame/subscribe [::subs/links])
         token (reagent/atom (get-item local-storage "token" "empty"))]
     [:div
-     (map-indexed
-      (fn [idx link]
-        (let [{:keys [id created_at description url posted_by votes]} link
-              time-difference (utils/time-diff-for-date created_at)]
-               [:div.flex.mt2.items-start
-                [:div.flex.items-center
-                 [:span.gray (str (inc idx) ".")]
-                 (when (not (= @token "empty"))
-                   [:div.f6.lh-copy.gray "▲"])
-                 [:div.ml1
-                  [:div (str description " (" url ")")]
-                  [:div.f6.lh-copy.gray
-                   (str (count votes)
-                        " votes | by "
-                        (:name posted_by)
-                        " "
-                        time-difference)]]]]))
-           @links)]))
+     (map-indexed (link-record @token)
+      @links)]))
+
+(defn search-panel []
+  (let [loading? (re-frame/subscribe [:loading?])
+        error? (re-frame/subscribe [:error?])
+        links (re-frame/subscribe [::subs/search-links])
+        filter (reagent/atom "")
+        token (reagent/atom (get-item local-storage "token" "empty"))
+        on-click (fn [_]
+                   (when-not (or (empty? @filter))
+                     (re-frame/dispatch [:search-links @filter])
+                     (reset! filter "")))]
+    (fn []
+      [:div
+       [:div "Search"
+        [:input {:type "text"
+                 :on-change #(reset! filter (-> % .-target .-value))}]
+        [:button {:type "button"
+                  :on-click #(when-not @loading? (on-click %))}
+          "OK"]]
+       (map-indexed (link-record @token)
+                    @links)
+       (when @error?
+         [:p.error-text.text-danger "Error in search"])])))
 
 (defn link-create-panel []
   (let [loading? (re-frame/subscribe [:loading?])
@@ -132,6 +156,7 @@
     :link-list-panel [link-list-panel]
     :link-create-panel [link-create-panel]
     :login-panel [login-panel]
+    :search-panel [search-panel]
     [:div]))
 
 (defn show-panel [panel-name]

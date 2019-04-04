@@ -32,5 +32,8 @@
   (defroute "/login" []
     (re-frame/dispatch [::events/set-active-panel :login-panel]))
 
+  (defroute "/search" []
+    (re-frame/dispatch [::events/set-active-panel :search-panel]))
+
   ;; --------------------
   (hook-browser-navigation!))
