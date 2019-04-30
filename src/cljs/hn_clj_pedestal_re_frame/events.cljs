@@ -27,6 +27,7 @@
       [::re-graph/query
        "{
           feed {
+            count
             links {
               id
               created_at
@@ -50,6 +51,38 @@
      (-> db
          (assoc :loading? true)
          (assoc :error false))))
+
+(re-frame/reg-event-db
+  ::on-new-link
+  (fn [db [_ {:keys [data errors] :as payload}]]
+    (let [links-prev (:links db)
+          link-new (:newLink data)
+          links (conj links-prev link-new)]
+      (-> db
+          (assoc :loading? false)
+          (assoc :links links)))))
+
+(re-frame/reg-event-db
+ ::subscribe-2-new-links
+ (fn-traced
+  [db  [_ _]]
+  (re-frame/dispatch
+   [::re-graph/subscribe
+    :subscribe-to-new-links
+    "{
+      newLink {
+        id
+        url
+        description
+        created_at
+        posted_by {
+          id
+          name
+        }
+      }
+    }"
+    {}
+    [::on-new-link]])))
 
 (re-frame/reg-event-db
   ::on-create-link

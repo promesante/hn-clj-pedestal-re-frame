@@ -93,13 +93,12 @@
   (fn [context arguments _]
     (let [{:keys [url description]} arguments
           usr-id (get-user-id context)
-          result (sql/insert-link<! {:? [usr-id]
+          link (sql/insert-link<! {:? [usr-id]
                                      :description description
                                      :url url}
-                                    db)
-          [first] result]
-      (r/deliver link-events first)
-      first)))
+                                    db)]
+      (r/deliver link-events link)
+      link)))
 
 (defn signup!
   [db]

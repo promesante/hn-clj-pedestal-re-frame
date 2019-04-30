@@ -9,3 +9,4 @@ out
 .nrepl-port
 .rebel_readline_history
 *.DS_Store
+/logs

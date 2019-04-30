@@ -21,9 +21,9 @@
 (defn ^:export init []
   (routes/app-routes)
   ;; initialise re-graph, including configuration options
-  (re-frame/dispatch [::re-graph/init
-                      {:ws-url                   nil
-                       :ws-reconnect-timeout     nil}])
+  (re-frame/dispatch [::re-graph/init {:resume-subscriptions?   false
+                                       :connection-init-payload {}}])
   (re-frame/dispatch-sync [::events/initialize-db])
+  (re-frame/dispatch-sync [::events/subscribe-2-new-links])
   (dev-setup)
   (mount-root))
