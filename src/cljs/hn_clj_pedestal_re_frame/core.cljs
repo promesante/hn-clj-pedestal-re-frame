@@ -21,9 +21,7 @@
 (defn ^:export init []
   (routes/app-routes)
   ;; initialise re-graph, including configuration options
-  (re-frame/dispatch [::re-graph/init {:resume-subscriptions?   false
-                                       :connection-init-payload {}}])
-  (re-frame/dispatch-sync [::events/initialize-db])
-  (re-frame/dispatch-sync [::events/subscribe-2-new-links])
+  (re-frame/dispatch [::re-graph/init {}])
+  (re-frame/dispatch [::events/init])
   (dev-setup)
   (mount-root))

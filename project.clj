@@ -15,7 +15,7 @@
                  [reagent "0.7.0"]
                  [re-frame "0.10.5"]
                  [secretary "1.2.3"]
-                 [re-graph "0.1.5"]]
+                 [re-graph "0.1.8"]]
 
   :plugins [[lein-cljsbuild "1.1.7"]]
 
