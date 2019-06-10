@@ -21,7 +21,13 @@
   ;; --------------------
   ;; define routes here
   (defroute "/" []
-    (re-frame/dispatch [::events/set-active-panel :link-list-panel]))
+    (secretary/dispatch! "/new/1"))
+
+  (defroute "/new/:page" [page]
+    (re-frame/dispatch [:fetch-new-links page]))
+
+  (defroute "/search" []
+    (re-frame/dispatch [::events/set-active-panel :search-panel]))
 
   (defroute "/create" []
     (re-frame/dispatch [::events/set-active-panel :link-create-panel]))
@@ -31,9 +37,6 @@
 
   (defroute "/login" []
     (re-frame/dispatch [::events/set-active-panel :login-panel]))
-
-  (defroute "/search" []
-    (re-frame/dispatch [::events/set-active-panel :search-panel]))
 
   ;; --------------------
   (hook-browser-navigation!))

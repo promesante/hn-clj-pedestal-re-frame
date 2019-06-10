@@ -7,13 +7,15 @@
    [cljs-time.format :as format]
    [hn-clj-pedestal-re-frame.db :as db]))
 
+(def links-per-page 5)
+
 (re-frame/reg-event-db
  ::set-active-panel
  (fn-traced [db [_ active-panel]]
    (assoc db :active-panel active-panel)))
 
 (re-frame/reg-event-fx
- ::init
+ ::init-alt
  (fn [{:keys [db]} [_ _]]
    {:db (-> db
             (assoc :loading? true)
@@ -44,26 +46,30 @@
                 [::on-feed]]}))
 
 (re-frame/reg-event-fx
- ::on-feed
- (fn [{:keys [db]} [_ {:keys [data errors] :as payload}]]
-   (let [links (get-in data [:feed :links])]
+ ::init
+; ::on-feed
+ (fn [{:keys [db]} [_ _]]
+; (fn [{:keys [db]} [_ {:keys [data errors] :as payload}]]
+;   (let [links (get-in data [:feed :links])]
      {:db (-> db
-              (assoc :loading? false)
-              (assoc :links links))
+              (assoc :loading? true)
+;              (assoc :loading? false)
+              (assoc :error false))
+;              (assoc :links links))
       :dispatch-n (list
                    [::re-graph/subscribe
                     :subscribe-to-new-links
                     "{
-                       newLink {
-                         id
-                         url
-                         description
-                         created_at
-                         posted_by {
-                           id
-                           name
-                         }
-                       }
+                      newLink {
+                        id
+                        url
+                        description
+                        created_at
+                        posted_by {
+                          id
+                          name
+                        }
+                      }
                     }"
                     {}
                     [::on-new-link]]
@@ -95,7 +101,7 @@
                     }"
                     {}
                     [::on-new-vote]]
-                   )})))
+                   )}))
        
 (re-frame/reg-event-db
   ::on-new-link
@@ -140,6 +146,52 @@
               (assoc :loading? false)
               (assoc :links links-updated)))
         db))))
+
+(re-frame/reg-event-fx
+ :fetch-new-links
+ (fn [{:keys [db]} [_ page]]
+   (let [first links-per-page
+         skip (* links-per-page (- page 1))]
+     {:db (-> db
+             (assoc :loading? true)
+             (assoc :error false))
+      :dispatch [::re-graph/query
+                 "FeedQuery($first: Int, $skip: Int) {
+                    feed(
+                      first: $first,
+                      skip: $skip
+                    ) {
+                      count
+                      links {
+                        id
+                        created_at
+                        url
+                        description
+                        posted_by {
+                          id
+                          name
+                        }
+                        votes {
+                          id
+                          user {
+                            id
+                          }
+                        }
+                      }
+                    }
+                  }"
+                  {:first first :skip skip}
+                 [::on-feed]
+                 ]})))
+
+(re-frame/reg-event-fx
+ ::on-feed
+ (fn [{:keys [db]} [_ {:keys [data errors] :as payload}]]
+   (let [links (get-in data [:feed :links])]
+     {:db (-> db
+              (assoc :loading? false)
+              (assoc :links links))
+      :dispatch [::set-active-panel :link-list-panel]})))
 
 (re-frame/reg-event-db
   :create-link
@@ -257,7 +309,9 @@
           }
        }"
        {:filter filter}
-       [::on-search-links]])
+       [::on-feed]
+;       [::on-search-links]
+       ])
      (-> db
          (assoc :loading? true)
          (assoc :error false))))

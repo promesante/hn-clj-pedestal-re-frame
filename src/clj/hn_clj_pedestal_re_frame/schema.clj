@@ -15,7 +15,7 @@
     [hn-clj-pedestal-re-frame.sql :as sql]))
 
 (def jwt-secret "GraphQL-is-aw3some")
-(def links-per-page 100)
+(def links-per-page 5)
 
 (def link-events (r/events))
 (def vote-events (r/events))
@@ -51,7 +51,7 @@
 (defn feed
   [db]
   (fn [_ args _]
-    (let [{:keys [filter skip first]} args
+    (let [{:keys [filter first skip]} args
           fltr (if (nil? filter) "" filter)
           fltr-sql (str "%" fltr "%" )
           skp (if (nil? skip) 0 skip)

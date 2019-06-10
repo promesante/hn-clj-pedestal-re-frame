@@ -8,6 +8,15 @@
     </encoder>
   </appender>
 
+  <appender name="HN_SCHEMA" class="ch.qos.logback.core.FileAppender">
+    <file> logs/hn-schema-log-${byDay}.txt </file>
+    <append>true</append>
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{35} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <!--
   <appender name="LACINIA_PEDESTAL_FILE" class="ch.qos.logback.core.FileAppender">
     <file> logs/lacinia-pedestal-log-${byDay}.txt </file>
     <append>true</append>
@@ -31,11 +40,17 @@
       <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{35} - %msg%n</pattern>
     </encoder>
   </appender>
+-->
   
   <root level="warn">
     <appender-ref ref="STDOUT"/>
   </root>
 
+  <logger name="hn-clj-pedestal-re-frame.schema" level="DEBUG">
+    <appender-ref ref="HN_SCHEMA"/>
+  </logger>
+
+  <!--
   <logger name="com.walmartlabs.lacinia.pedestal" level="DEBUG">
     <appender-ref ref="LACINIA_PEDESTAL_FILE"/>
   </logger>
@@ -47,5 +62,6 @@
   <logger name="io.pedestal.http.jetty.websockets" level="DEBUG">
     <appender-ref ref="PEDESTAL_FILE"/>
   </logger>
+-->
 
 </configuration>

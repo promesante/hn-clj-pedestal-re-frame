@@ -8,6 +8,7 @@ select id, description, url, usr_id, created_at, updated_at
 from link
 where description like :filter
 or url like :filter
+order by created_at DESC
 limit ?::integer
 offset ?::integer
 

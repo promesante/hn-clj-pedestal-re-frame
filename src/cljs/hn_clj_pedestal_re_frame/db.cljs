@@ -6,7 +6,7 @@
    :loading? false
    :error false
    :links []
-   :search-links []
+;   :search-links []
    :link {}
    :auth {}
    })

@@ -19,6 +19,8 @@
       [:div.fw7.mr1 "Hacker News"]
       [:a.ml1.no-underline.black {:href "#/"} "new"]
       [:div.ml1 "|"]
+;      [:a.ml1.no-underline.black {:href "#/top"} "top"]
+;      [:div.ml1 "|"]
       [:a.ml1.no-underline.black {:href "#/search"} "search"]
       [:div.ml1 "|"]
       [:a.ml1.no-underline.black {:href "#/create"} "submit"]]
@@ -45,7 +47,9 @@
 
 (defn link-list-panel []
   (let [links (re-frame/subscribe [::subs/links])
-        token (reagent/atom (get-item local-storage "token" "empty"))]
+        token (reagent/atom (get-item local-storage "token" "empty"))
+        pathname js/window.location.pathname]
+    (println (str "pathname: " pathname))
     [:div
      (map-indexed (link-record @token)
       @links)]))
