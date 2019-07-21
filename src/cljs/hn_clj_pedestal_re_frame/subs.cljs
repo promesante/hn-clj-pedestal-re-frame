@@ -14,9 +14,14 @@
    (:active-panel db)))
 
 (re-frame/reg-sub
- ::links
+ ::new-links
  (fn [db]
-   (:links db)))
+   (:new-links db)))
+
+(re-frame/reg-sub
+ ::top-links
+ (fn [db]
+   (:top-links db)))
 
 (re-frame/reg-sub
  ::search-links
@@ -32,6 +37,11 @@
  :error?
  (fn [db]
    (:error db)))
+
+(re-frame/reg-sub
+ :count
+ (fn [db]
+   (:count db)))
 
 ; (re-frame/register-sub
 ;  :loading?

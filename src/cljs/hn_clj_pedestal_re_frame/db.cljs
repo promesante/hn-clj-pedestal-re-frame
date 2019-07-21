@@ -5,8 +5,10 @@
    :name "re-frame"
    :loading? false
    :error false
-   :links []
-;   :search-links []
+   :new-links []
+   :search-links []
+   :top-links []
    :link {}
    :auth {}
+   :count 0
    })

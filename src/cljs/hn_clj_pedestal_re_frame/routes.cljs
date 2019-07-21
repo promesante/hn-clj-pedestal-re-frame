@@ -1,42 +1,43 @@
 (ns hn-clj-pedestal-re-frame.routes
-  (:require-macros [secretary.core :refer [defroute]])
-  (:import goog.History)
-  (:require
-   [secretary.core :as secretary]
-   [goog.events :as gevents]
-   [goog.history.EventType :as EventType]
-   [re-frame.core :as re-frame]
-   [hn-clj-pedestal-re-frame.events :as events]))
+  (:require [bidi.bidi :as bidi]
+            [pushy.core :as pushy]
+            [re-frame.core :as re-frame]
+            [hn-clj-pedestal-re-frame.events :as events]))
 
-(defn hook-browser-navigation! []
-  (doto (History.)
-    (gevents/listen
-     EventType/NAVIGATE
-     (fn [event]
-       (secretary/dispatch! (.-token event))))
-    (.setEnabled true)))
+(def routes ["/" 
+             {"new/" {[:page] :new}
+              "" :new
+              "search" :search
+              "create" :create
+              "login" :login
+              "top" :top
+              true :not-found}])
 
-(defn app-routes []
-  (secretary/set-config! :prefix "#")
-  ;; --------------------
-  ;; define routes here
-  (defroute "/" []
-    (secretary/dispatch! "/new/1"))
+(def panel-sufix "-panel")
+(def events {:new #(re-frame/dispatch [:fetch-new-links (:page %)])
+             :top #(re-frame/dispatch [:fetch-top-links])})
 
-  (defroute "/new/:page" [page]
-    (re-frame/dispatch [:fetch-new-links page]))
+(defn switch-panel [panel-id]
+  (let [panel-name (keyword (str (name panel-id) panel-sufix))]
+    (re-frame/dispatch [::events/set-active-panel panel-name])))
 
-  (defroute "/search" []
-    (re-frame/dispatch [::events/set-active-panel :search-panel]))
+(defn handle-match [match]
+  (let [{:keys [handler route-params]} match
+        event (get events handler)]
+    (if (nil? event)
+      (switch-panel handler)
+      (event route-params))))
 
-  (defroute "/create" []
-    (re-frame/dispatch [::events/set-active-panel :link-create-panel]))
+(defn bidi-matcher
+  "Will match a URL to a route"
+  [s]
+  (let [match (bidi/match-route routes s)]
+    match))
 
-  (defroute "/signup" []
-    (re-frame/dispatch [::events/set-active-panel :signup-panel]))
+(def history
+  (pushy/pushy handle-match bidi-matcher))
 
-  (defroute "/login" []
-    (re-frame/dispatch [::events/set-active-panel :login-panel]))
+(defn start-history! []
+  (pushy/start! history))
 
-  ;; --------------------
-  (hook-browser-navigation!))
+(def url-for (partial bidi/path-for routes))

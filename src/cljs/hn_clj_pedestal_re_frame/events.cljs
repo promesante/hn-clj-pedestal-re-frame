@@ -5,9 +5,13 @@
    [day8.re-frame.tracing :refer-macros [fn-traced defn-traced]]
    [hodgepodge.core :refer [local-storage set-item remove-item]]
    [cljs-time.format :as format]
-   [hn-clj-pedestal-re-frame.db :as db]))
+   [hn-clj-pedestal-re-frame.db :as db]
+   [hn-clj-pedestal-re-frame.graph-ql.queries :as queries]
+   [hn-clj-pedestal-re-frame.graph-ql.mutations :as mutations]
+   [hn-clj-pedestal-re-frame.graph-ql.subscriptions :as subscriptions]))
 
-(def links-per-page 5)
+(def new-links-per-page 5)
+(def top-links-per-page 100)
 
 (re-frame/reg-event-db
  ::set-active-panel
@@ -15,93 +19,29 @@
    (assoc db :active-panel active-panel)))
 
 (re-frame/reg-event-fx
- ::init-alt
- (fn [{:keys [db]} [_ _]]
-   {:db (-> db
-            (assoc :loading? true)
-            (assoc :error false))
-    :dispatch [::re-graph/query
-               "{
-                  feed {
-                    count
-                    links {
-                      id
-                      created_at
-                      url
-                      description
-                      posted_by {
-                        id
-                        name
-                      }
-                      votes {
-                        id
-                        user {
-                          id
-                        }
-                      }
-                    }
-                  }
-                }"
-                {}
-                [::on-feed]]}))
+   ::init
+   (fn [{:keys [db]} [_ _]]
+     {:db db/default-db
+      :dispatch [::init-re-graph]}))
 
 (re-frame/reg-event-fx
- ::init
-; ::on-feed
+ ::init-re-graph
  (fn [{:keys [db]} [_ _]]
-; (fn [{:keys [db]} [_ {:keys [data errors] :as payload}]]
-;   (let [links (get-in data [:feed :links])]
      {:db (-> db
               (assoc :loading? true)
-;              (assoc :loading? false)
               (assoc :error false))
-;              (assoc :links links))
       :dispatch-n (list
+                   [::re-graph/init {}]
                    [::re-graph/subscribe
                     :subscribe-to-new-links
-                    "{
-                      newLink {
-                        id
-                        url
-                        description
-                        created_at
-                        posted_by {
-                          id
-                          name
-                        }
-                      }
-                    }"
+                    subscriptions/new-link
                     {}
                     [::on-new-link]]
                    [::re-graph/subscribe
                     :subscribe-to-new-votes
-                    "{
-                      newVote {
-                        id
-                        link {
-                          id
-                          url
-                          description
-                          created_at
-                          posted_by {
-                            id
-                            name
-                          }
-                          votes {
-                            id
-                            user {
-                              id
-                            }
-                          }
-                        }
-                        user {
-                          id
-                        }
-                      }
-                    }"
+                    subscriptions/new-vote
                     {}
-                    [::on-new-vote]]
-                   )}))
+                    [::on-new-vote]])}))
        
 (re-frame/reg-event-db
   ::on-new-link
@@ -150,62 +90,61 @@
 (re-frame/reg-event-fx
  :fetch-new-links
  (fn [{:keys [db]} [_ page]]
-   (let [first links-per-page
-         skip (* links-per-page (- page 1))]
+   (let [first new-links-per-page
+         pg (if (nil? page) 1 page)
+         skip (* new-links-per-page (- pg 1))]
      {:db (-> db
              (assoc :loading? true)
              (assoc :error false))
       :dispatch [::re-graph/query
-                 "FeedQuery($first: Int, $skip: Int) {
-                    feed(
-                      first: $first,
-                      skip: $skip
-                    ) {
-                      count
-                      links {
-                        id
-                        created_at
-                        url
-                        description
-                        posted_by {
-                          id
-                          name
-                        }
-                        votes {
-                          id
-                          user {
-                            id
-                          }
-                        }
-                      }
-                    }
-                  }"
+                 queries/feed
                   {:first first :skip skip}
-                 [::on-feed]
-                 ]})))
+                 [::on-feed-new]]})))
 
 (re-frame/reg-event-fx
- ::on-feed
+ ::on-feed-new
  (fn [{:keys [db]} [_ {:keys [data errors] :as payload}]]
-   (let [links (get-in data [:feed :links])]
+   (let [links (get-in data [:feed :links])
+         count (get-in data [:feed :count])]
      {:db (-> db
               (assoc :loading? false)
-              (assoc :links links))
-      :dispatch [::set-active-panel :link-list-panel]})))
+              (assoc :new-links links)
+              (assoc :count count))
+      :dispatch [::set-active-panel :new-panel]})))
+
+(re-frame/reg-event-fx
+ :fetch-top-links
+ (fn [{:keys [db]} [_ _]]
+   (let [first top-links-per-page
+         skip 1]
+     {:db (-> db
+             (assoc :loading? true)
+             (assoc :error false))
+      :dispatch [::re-graph/query
+                 queries/feed
+                  {:first first :skip skip}
+                 [::on-feed-top]]})))
+
+(re-frame/reg-event-fx
+ ::on-feed-top
+ (fn [{:keys [db]} [_ {:keys [data errors] :as payload}]]
+   (let [links (get-in data [:feed :links])
+         votes (map (fn [link] (count (:votes link))) links)
+         links-with-votes (filter (fn [link] (not (empty? (:votes link)))) links)
+         ranked-links (sort
+                       #(compare (count (:votes %2)) (count (:votes %1)))
+                       links-with-votes)]
+     {:db (-> db
+              (assoc :loading? false)
+              (assoc :top-links ranked-links))
+      :dispatch [::set-active-panel :top-panel]})))
 
 (re-frame/reg-event-db
   :create-link
   (fn-traced [db  [_ description url]]
     (re-frame/dispatch
-      [::re-graph/mutate
-       "post($url:String!, $description:String!) {
-          post(
-            url: $url,
-            description: $description
-          ) {
-            id
-          }
-        }"
+     [::re-graph/mutate
+       mutations/post
        {:url url
         :description description}
        [::on-create-link]])
@@ -224,16 +163,8 @@
   :signup
   (fn-traced [db  [_ name email password]]
     (re-frame/dispatch
-      [::re-graph/mutate
-       "signup($email:String!, $password:String!, $name:String!) {
-          signup(
-            email: $email,
-            password: $password,
-            name: $name
-          ) {
-            token
-          }
-        }"
+     [::re-graph/mutate
+       mutations/signup
        {:email email
         :password password
         :name name}
@@ -245,7 +176,7 @@
 (re-frame/reg-event-db
   ::on-signup
   (fn [db [_ {:keys [data errors] :as payload}]]
-    (re-frame/dispatch [::set-active-panel :link-list-panel])
+    (re-frame/dispatch [::set-active-panel :new-panel])
     (let [token (get-in data [:signup :token])]
       (set-item local-storage "token" token)
       (-> db
@@ -257,17 +188,9 @@
   (fn-traced [db  [_ email password]]
     (re-frame/dispatch
       [::re-graph/mutate
-       "login($email:String!, $password:String!) {
-          login(
-            email: $email,
-            password: $password
-          ) {
-            token
-          }
-        }"
+       mutations/login
        {:email email
-        :password password
-        }
+        :password password}
        [::on-login]])
      (-> db
          (assoc :loading? true)
@@ -276,7 +199,7 @@
 (re-frame/reg-event-db
   ::on-login
   (fn [db [_ {:keys [data errors] :as payload}]]
-    (re-frame/dispatch [::set-active-panel :link-list-panel])
+    (re-frame/dispatch [::set-active-panel :new-panel])
     (let [token (get-in data [:login :token])]
       (set-item local-storage "token" token)
       (-> db
@@ -287,31 +210,10 @@
  :search-links
   (fn-traced [db  [_ filter]]
     (re-frame/dispatch
-      [::re-graph/query
-       "FeedSearchQuery($filter: String!) {
-          feed(filter: $filter) {
-            links {
-              id
-              url
-              description
-              created_at
-              posted_by {
-                id
-                name
-              }
-              votes {
-                id
-                user {
-                  id
-                }
-              }
-            }
-          }
-       }"
+     [::re-graph/query
+      queries/search
        {:filter filter}
-       [::on-feed]
-;       [::on-search-links]
-       ])
+       [::on-feed]])
      (-> db
          (assoc :loading? true)
          (assoc :error false))))

@@ -2,7 +2,6 @@
   (:require
    [reagent.core :as reagent]
    [re-frame.core :as re-frame]
-   [re-graph.core :as re-graph]
    [hn-clj-pedestal-re-frame.events :as events]
    [hn-clj-pedestal-re-frame.routes :as routes]
    [hn-clj-pedestal-re-frame.views :as views]
@@ -19,9 +18,9 @@
                   (.getElementById js/document "app")))
 
 (defn ^:export init []
-  (routes/app-routes)
-  ;; initialise re-graph, including configuration options
-  (re-frame/dispatch [::re-graph/init {}])
-  (re-frame/dispatch [::events/init])
+  (re-frame/dispatch-sync [::events/init])
+  (routes/start-history!)
   (dev-setup)
   (mount-root))
+
+

@@ -1,9 +1,12 @@
 (ns hn-clj-pedestal-re-frame.views
   (:require
+   [clojure.string :as str]
    [reagent.core :as reagent]
    [re-frame.core :as re-frame]
    [hodgepodge.core :refer [local-storage get-item remove-item]]
+   [hn-clj-pedestal-re-frame.routes :as routes]
    [hn-clj-pedestal-re-frame.subs :as subs]
+   [hn-clj-pedestal-re-frame.events :as events]
    [hn-clj-pedestal-re-frame.utils :as utils]))
 
 (defn header-panel []
@@ -17,21 +20,21 @@
     [:div.flex.pa1.justify-between.nowrap.orange
      [:div.flex.flex-fixed.black
       [:div.fw7.mr1 "Hacker News"]
-      [:a.ml1.no-underline.black {:href "#/"} "new"]
+      [:a.ml1.no-underline.black {:href (routes/url-for :new :page 1)} "new"]
       [:div.ml1 "|"]
-;      [:a.ml1.no-underline.black {:href "#/top"} "top"]
-;      [:div.ml1 "|"]
-      [:a.ml1.no-underline.black {:href "#/search"} "search"]
+      [:a.ml1.no-underline.black {:href "/top"} "top"]
       [:div.ml1 "|"]
-      [:a.ml1.no-underline.black {:href "#/create"} "submit"]]
+      [:a.ml1.no-underline.black {:href (routes/url-for :search)} "search"]
+      [:div.ml1 "|"]
+      [:a.ml1.no-underline.black {:href (routes/url-for :create)} "submit"]]
      [:div.flex.flex-fixed
       [:a.ml1.no-underline.black
-       {:href (str "#/" route)
+       {:href (str "/" route)
         :on-click #(when-not @loading? (on-click %))}
-       label]]]))
+       label]]
+     ]))
 
-(defn link-record
-  [token]
+(defn link-record [token]
   (fn [idx link]
     (let [{:keys [id created_at description url posted_by votes]} link
           time-diff (utils/time-diff-for-date created_at)]
@@ -43,16 +46,42 @@
         [:div.ml1
          [:div (str description " (" url ")")]
          [:div.f6.lh-copy.gray
-          (str (count votes) " votes | by " (:name posted_by) " " time-diff)]]]])))
+          (str (count votes) " votes | by " (:name posted_by) " " time-diff)]]
+        ]])))
 
-(defn link-list-panel []
-  (let [links (re-frame/subscribe [::subs/links])
+(defn parse-page []
+  (let [path-name js/window.location.pathname
+        path-elems (str/split path-name #"/")
+        path-length (count path-elems)]
+    (if (and (= path-length 3) (= "new" (get path-elems 1)))
+      (js/parseInt (get path-elems 2))
+      1)))
+
+(defn new-panel []
+  (let [links (re-frame/subscribe [::subs/new-links])
+        count (re-frame/subscribe [:count])
         token (reagent/atom (get-item local-storage "token" "empty"))
-        pathname js/window.location.pathname]
-    (println (str "pathname: " pathname))
+        page (parse-page)
+        links-per-page events/new-links-per-page
+        last (quot @count links-per-page)]
     [:div
      (map-indexed (link-record @token)
-      @links)]))
+                  @links)
+     [:div.flex.ml4.mv3.gray
+      (when (> page 1)
+        [:a.ml1.no-underline.gray
+         {:href (routes/url-for :new :page (- page 1))} "Previous"])
+      (when (< page last)
+        [:a.ml1.no-underline.gray
+         {:href (routes/url-for :new :page (+ page 1))} "Next"])]]))
+
+(defn top-panel []
+  (let [links (re-frame/subscribe [::subs/top-links])
+        token (reagent/atom (get-item local-storage "token" "empty"))
+        ]
+    [:div
+     (map-indexed (link-record @token)
+                  @links)]))
 
 (defn search-panel []
   (let [loading? (re-frame/subscribe [:loading?])
@@ -77,7 +106,7 @@
        (when @error?
          [:p.error-text.text-danger "Error in search"])])))
 
-(defn link-create-panel []
+(defn create-panel []
   (let [loading? (re-frame/subscribe [:loading?])
         error? (re-frame/subscribe [:error?])
         description (reagent/atom "")
@@ -121,7 +150,8 @@
                    (when-not (or (empty? @email) (empty? @password))
                      (re-frame/dispatch [:login @email @password])
                      (reset! email "")
-                     (reset! password "")))]
+                     (reset! password "")))
+        ]
     (fn []
       [:div
        [:h4 {:class "mv3"} (if @login "Login" "Sign Up")]
@@ -157,8 +187,9 @@
 ;; main
 (defn- panels [panel-name]
   (case panel-name
-    :link-list-panel [link-list-panel]
-    :link-create-panel [link-create-panel]
+    :new-panel [new-panel]
+    :top-panel [top-panel]
+    :create-panel [create-panel]
     :login-panel [login-panel]
     :search-panel [search-panel]
     [:div]))
