@@ -75,11 +75,7 @@
    }
  
  :queries
- {:info
-  {:type (non-null String)
-   :resolve :query/info}
-
-  :feed
+ {:feed
   {:type (non-null Feed)
    :args
    {

@@ -20,9 +20,6 @@
 (def link-events (r/events))
 (def vote-events (r/events))
 
-(defn info [context arguments value]
-    "This is the API of a Hackernews Clone")
-
 (defn to-keyword 
   [my-map]
   (into {}
@@ -66,28 +63,6 @@
                 :count count}]
       feed)))
 
-;; not able to implement order_by with yesql yet
-;; TODO: to be done whan adopting HoneySQL
-(defn _feed
-  [db]
-  (fn [_ args _]
-    (let [{:keys [filter skip first order_by]} args
-          skp (when (nil? skip) 0)
-          frst (when (nil? first) links-per-page)]
-      (if (nil? order_by)
-        (let [links (sql/filter-links {:? [frst skp]
-                                       :filter (str "%" filter "%" )}
-                                      db)]
-          links)
-        (let [order (parse-order order_by)
-              {:keys [field criteria]} order
-              links (sql/filter-links-order {:? [frst skp]
-                                             :filter (str "%" filter "%" )
-                                             :field field
-                                             :criteria criteria}
-                                            db)]
-          links)))))
-
 (defn post!
   [db]
   (fn [context arguments _]
@@ -96,7 +71,7 @@
           link (sql/insert-link<! {:? [usr-id]
                                      :description description
                                      :url url}
-                                    db)]
+                                  db)]
       (r/deliver link-events link)
       link)))
 
@@ -181,8 +156,7 @@
 (defn resolver-map
   [component]
   (let [db (:db component)]
-    {:query/info info
-     :query/feed (feed db)
+    {:query/feed (feed db)
      :mutation/post! (post! db)
      :mutation/signup! (signup! db)
      :mutation/login! (login! db)

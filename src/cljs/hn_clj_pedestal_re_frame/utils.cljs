@@ -10,8 +10,7 @@
     {:conv 24 :message " h ago"}
     {:conv 30 :message " days ago"}
     {:conv 365 :message " mo ago"}
-    {:conv 10 :message " years ago"}
-                    ])
+    {:conv 10 :message " years ago"}])
 
 (def mills-per-sec 1000)
 
