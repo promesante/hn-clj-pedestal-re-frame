@@ -1,12 +1,11 @@
 (ns hn-clj-pedestal-re-frame.routes
   (:require [bidi.bidi :as bidi]
             [pushy.core :as pushy]
-            [re-frame.core :as re-frame]
-            [hn-clj-pedestal-re-frame.events :as events]))
+            [re-frame.core :as re-frame]))
 
 (def routes ["/" 
-             {"new/" {[:page] :new}
-              "" :new
+             {"" :home
+              "new/" {[:page] :new}
               "search" :search
               "create" :create
               "login" :login
@@ -14,12 +13,13 @@
               true :not-found}])
 
 (def panel-sufix "-panel")
-(def events {:new #(re-frame/dispatch [:fetch-new-links (:page %)])
+(def events {:home #(re-frame/dispatch [:fetch-new-links 1])
+             :new #(re-frame/dispatch [:fetch-new-links (:page %)])
              :top #(re-frame/dispatch [:fetch-top-links])})
 
 (defn switch-panel [panel-id]
   (let [panel-name (keyword (str (name panel-id) panel-sufix))]
-    (re-frame/dispatch [::events/set-active-panel panel-name])))
+    (re-frame/dispatch [:set-active-panel panel-name])))
 
 (defn handle-match [match]
   (let [{:keys [handler route-params]} match
@@ -41,3 +41,6 @@
   (pushy/start! history))
 
 (def url-for (partial bidi/path-for routes))
+
+(defn set-history! [route]
+  (pushy/set-token! history (url-for route)))

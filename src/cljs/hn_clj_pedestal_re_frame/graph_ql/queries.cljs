@@ -1,5 +1,4 @@
-(ns hn-clj-pedestal-re-frame.graph-ql.queries
-  )
+(ns hn-clj-pedestal-re-frame.graph-ql.queries)
 
 (def feed
   "FeedQuery($first: Int, $skip: Int) {

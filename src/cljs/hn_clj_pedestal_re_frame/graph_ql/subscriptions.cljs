@@ -1,5 +1,4 @@
-(ns hn-clj-pedestal-re-frame.graph-ql.subscriptions
-  )
+(ns hn-clj-pedestal-re-frame.graph-ql.subscriptions)
 
 (def new-link
   "{

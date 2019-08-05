@@ -9,6 +9,6 @@
    :search-links []
    :top-links []
    :link {}
-   :auth {}
+   :auth? false
    :count 0
    })

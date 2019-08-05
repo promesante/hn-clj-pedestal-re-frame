@@ -1,5 +1,4 @@
-(ns hn-clj-pedestal-re-frame.graph-ql.mutations
-  )
+(ns hn-clj-pedestal-re-frame.graph-ql.mutations)
 
 (def post
   "post($url:String!, $description:String!) {
@@ -8,6 +7,21 @@
       description: $description
     ) {
       id
+    }
+  }")
+
+(def vote
+  "vote($link_id:ID!) {
+    vote(
+      link_id: $link_id
+    ) {
+      id
+      link {
+        id
+      }
+      user {
+        id
+      }
     }
   }")
 
