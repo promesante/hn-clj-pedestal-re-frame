@@ -4,7 +4,7 @@
    [re-frame.core :as re-frame]
    [hn-clj-pedestal-re-frame.events :as events]
    [hn-clj-pedestal-re-frame.routes :as routes]
-   [hn-clj-pedestal-re-frame.views :as views]
+   [hn-clj-pedestal-re-frame.views.core :as views]
    [hn-clj-pedestal-re-frame.config :as config]))
 
 (defn dev-setup []
