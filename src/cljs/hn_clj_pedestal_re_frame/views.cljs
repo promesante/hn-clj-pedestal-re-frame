@@ -35,37 +35,34 @@
 ; Utils
 ;-----------------------------------------------------------------------
 
-; (defn parse-page []
-;   (let [path-name js/window.location.pathname
-;         path-elems (str/split path-name #"/")
-;         path-length (count path-elems)]
-;     (if (and (= path-length 3) (= "new" (get path-elems 1)))
-;       (js/parseInt (get path-elems 2))
-;       1)))
+(defn parse-page []
+  (let [path-name js/window.location.pathname
+        path-elems (str/split path-name #"/")
+        path-length (count path-elems)]
+    (if (and (= path-length 3) (= "new" (get path-elems 1)))
+      (js/parseInt (get path-elems 2))
+      1)))
 
-; (defn parse-path []
-;   (let [path-name js/window.location.pathname
-;         path-elems (str/split path-name #"/")
-;         path (get path-elems 1)]
-;     path))
+(defn parse-path []
+  (let [path-name js/window.location.pathname
+        path-elems (str/split path-name #"/")
+        path (get path-elems 1)]
+    path))
 
 (defn link-record []
   (fn [idx link]
     (let [{:keys [id created_at description url posted_by votes]} link
           link-id (js/parseInt id)
           auth? (re-frame/subscribe [:auth?])
-          new? (re-frame/subscribe [:new?])
           time-diff (utils/time-diff-for-date created_at)
-;          path (parse-path)
-;          path-new? (or (nil? path) (= "new" path))
-;          new? (reagent/atom path-new?)
-          ]
+          path (parse-path)
+          new? (or (nil? path) (= "new" path))]
       [:div.flex.mt2.items-start
-       [:div.flex.items-center
+       [:div.flex.items-center {:key id}
         [:span.gray (str (inc idx) ".")]
-        (when (and @auth? @new?)
+        (when (and @auth? new?)
           [:div.f6.lh-copy.gray
-           {:on-click #(re-frame/dispatch [:vote-link link-id])} "▲"])
+            {:on-click #(re-frame/dispatch [:vote-link link-id])} "▲"])
         [:div.ml1
          [:div (str description " (" url ")")]
          [:div.f6.lh-copy.gray
@@ -83,6 +80,7 @@
         page (parse-page)
         last (quot @count config/new-links-per-page)]
     [:div
+     (when @auth? [:div ""])
      (map-indexed (link-record) @links)
      [:div.flex.ml4.mv3.gray
       (when (> page 1)

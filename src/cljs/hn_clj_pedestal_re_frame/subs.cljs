@@ -30,11 +30,6 @@
    (:error db)))
 
 (re-frame/reg-sub
- :new?
- (fn [db]
-   (:new? db)))
-
-(re-frame/reg-sub
  :headers
  (fn [db _]
    (get-in db config/token-header-path)))

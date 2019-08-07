@@ -173,8 +173,7 @@
      {:db (-> db
               (assoc :loading? false)
               (assoc :new-links links)
-              (assoc :count count)
-              (assoc :new? true))
+              (assoc :count count))
       :dispatch [:set-active-panel :new-panel]})))
 
 (re-frame/reg-event-fx
@@ -201,8 +200,7 @@
                        links-with-votes)]
      {:db (-> db
               (assoc :loading? false)
-              (assoc :top-links ranked-links)
-              (assoc :new? false))
+              (assoc :top-links ranked-links))
       :dispatch [:set-active-panel :top-panel]})))
 
 (re-frame/reg-event-fx
@@ -222,8 +220,7 @@
     (let [links (get-in data [:feed :links])]
       (-> db
           (assoc :loading? false)
-          (assoc :search-links links)
-          (assoc :new? false)))))
+          (assoc :search-links links)))))
 
 
 ;-----------------------------------------------------------------------
