@@ -1,4 +1,4 @@
-(ns hn-clj-pedestal-re-frame.utils
+(ns hn-clj-pedestal-re-frame.views.utils
   (:require
    [cljs-time.core :as time]
    [cljs-time.format :as format]

@@ -6,7 +6,7 @@
    [hn-clj-pedestal-re-frame.routes :as routes]
    [hn-clj-pedestal-re-frame.subs :as subs]
    [hn-clj-pedestal-re-frame.config :as config]
-   [hn-clj-pedestal-re-frame.utils :as utils]))
+   [hn-clj-pedestal-re-frame.views.utils :as utils]))
 
 
 ;-----------------------------------------------------------------------

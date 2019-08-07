@@ -2,7 +2,14 @@
   (:require
    [reagent.core :as reagent]
    [re-frame.core :as re-frame]
-   [hn-clj-pedestal-re-frame.events :as events]
+   [hn-clj-pedestal-re-frame.events.init :as events]
+   [hn-clj-pedestal-re-frame.events.authentication]
+   [hn-clj-pedestal-re-frame.events.core]
+   [hn-clj-pedestal-re-frame.events.init]
+   [hn-clj-pedestal-re-frame.events.utils]
+   [hn-clj-pedestal-re-frame.events.graph-ql.queries]
+   [hn-clj-pedestal-re-frame.events.graph-ql.mutations]
+   [hn-clj-pedestal-re-frame.events.graph-ql.subscriptions]
    [hn-clj-pedestal-re-frame.routes :as routes]
    [hn-clj-pedestal-re-frame.views.core :as views]
    [hn-clj-pedestal-re-frame.config :as config]))
