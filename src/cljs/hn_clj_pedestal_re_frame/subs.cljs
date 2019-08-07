@@ -9,10 +9,10 @@
 ; Core
 ;-----------------------------------------------------------------------
 
-(re-frame/reg-sub
- ::name
- (fn [db]
-   (:name db)))
+; (re-frame/reg-sub
+;  ::name
+;  (fn [db]
+;    (:name db)))
 
 (re-frame/reg-sub
  ::active-panel

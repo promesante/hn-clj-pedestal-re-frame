@@ -2,7 +2,7 @@
 
 (def default-db
   {
-   :name "re-frame"
+;   :name "re-frame"
    :loading? false
    :error false
    :new-links []
@@ -10,5 +10,5 @@
    :top-links []
    :link {}
    :count 0
-   :new? false
+;   :new? false
    })
