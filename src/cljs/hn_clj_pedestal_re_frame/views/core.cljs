@@ -37,7 +37,7 @@
       [:a.ml1.no-underline.black {:href (str "/" route)} route]]]))
 
 (defn main-panel []
-  (let [active-panel (re-frame/subscribe [::subs/active-panel])]
+  (let [active-panel (re-frame/subscribe [:active-panel])]
     [:div.ph3.pv1.background-gray
       [header-panel]
       [show-panel @active-panel]]))

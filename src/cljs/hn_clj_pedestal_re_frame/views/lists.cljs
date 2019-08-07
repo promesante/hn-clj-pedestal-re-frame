@@ -41,7 +41,7 @@
           path (parse-path)
           new? (or (nil? path) (= "new" path))]
       [:div.flex.mt2.items-start
-       [:div.flex.items-center {:key id}
+       [:div.flex.items-center
         [:span.gray (str (inc idx) ".")]
         (when (and @auth? new?)
           [:div.f6.lh-copy.gray
@@ -57,7 +57,7 @@
 ;-----------------------------------------------------------------------
 
 (defn new-panel []
-  (let [links (re-frame/subscribe [::subs/new-links])
+  (let [links (re-frame/subscribe [:new-links])
         count (re-frame/subscribe [:count])
         auth? (re-frame/subscribe [:auth?])
         page (parse-page)
@@ -74,14 +74,14 @@
          {:href (routes/url-for :new :page (+ page 1))} "Next"])]]))
 
 (defn top-panel []
-  (let [links (re-frame/subscribe [::subs/top-links])]
+  (let [links (re-frame/subscribe [:top-links])]
     [:div
      (map-indexed (link-record) @links)]))
 
 (defn search-panel []
   (let [loading? (re-frame/subscribe [:loading?])
         error? (re-frame/subscribe [:error?])
-        links (re-frame/subscribe [::subs/search-links])
+        links (re-frame/subscribe [:search-links])
         filter (reagent/atom "")
         on-click (fn [_]
                    (when-not (or (empty? @filter))

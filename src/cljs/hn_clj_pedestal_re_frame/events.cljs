@@ -2,7 +2,6 @@
   (:require
    [re-frame.core :as re-frame]
    [re-graph.core :as re-graph]
-   [day8.re-frame.tracing :refer-macros [fn-traced defn-traced]]
    [hodgepodge.core :refer [local-storage get-item set-item remove-item]]
    [cljs-time.format :as format]
    [hn-clj-pedestal-re-frame.routes :as routes]
@@ -19,8 +18,8 @@
 
 (re-frame/reg-event-db
  :set-active-panel
- (fn-traced [db [_ active-panel]]
-            (assoc db :active-panel active-panel)))
+ (fn [db [_ active-panel]]
+   (assoc db :active-panel active-panel)))
 
 (re-frame/reg-fx
  :set-history
@@ -56,10 +55,10 @@
    ::init
    (fn [{:keys [db]} [_ _]]
      {:db db/default-db
-      :dispatch [::init-re-graph]}))
+      :dispatch [:init-re-graph]}))
 
 (re-frame/reg-event-fx
- ::init-re-graph
+ :init-re-graph
  (fn [{:keys [db]} [_ _]]
      {:db (-> db
               (assoc :loading? true)
@@ -73,12 +72,12 @@
                     :subscribe-to-new-links
                     subscriptions/new-link
                     {}
-                    [::on-new-link]]
+                    [:on-new-link]]
                    [::re-graph/subscribe
                     :subscribe-to-new-votes
                     subscriptions/new-vote
                     {}
-                    [::on-new-vote]])}))
+                    [:on-new-vote]])}))
 
        
 ;-----------------------------------------------------------------------
@@ -129,7 +128,7 @@
 ;-----------------------------------------------------------------------
 
 (re-frame/reg-event-db
-  ::on-new-link
+  :on-new-link
   (fn [db [_ {:keys [data errors] :as payload}]]
     (let [link-new (:newLink data)
           links-prev (:new-links db)
@@ -142,10 +141,10 @@
               (assoc :new-links links)))))))
 
 (re-frame/reg-event-fx
- ::on-new-vote
+ :on-new-vote
  (fn [{:keys [db]} [_ {:keys [data errors] :as payload}]]
    (let [vote-new (:newVote data)]
-     {:dispatch [::on-new-vote-db vote-new]})))
+     {:dispatch [:on-new-vote-db vote-new]})))
 
 
 ;-----------------------------------------------------------------------
@@ -163,10 +162,10 @@
       :dispatch [::re-graph/query
                  queries/feed
                   {:first first :skip skip}
-                 [::on-feed-new]]})))
+                 [:on-feed-new]]})))
 
 (re-frame/reg-event-fx
- ::on-feed-new
+ :on-feed-new
  (fn [{:keys [db]} [_ {:keys [data errors] :as payload}]]
    (let [links (get-in data [:feed :links])
          count (get-in data [:feed :count])]
@@ -187,10 +186,10 @@
       :dispatch [::re-graph/query
                  queries/feed
                   {:first first :skip skip}
-                 [::on-feed-top]]})))
+                 [:on-feed-top]]})))
 
 (re-frame/reg-event-fx
- ::on-feed-top
+ :on-feed-top
  (fn [{:keys [db]} [_ {:keys [data errors] :as payload}]]
    (let [links (get-in data [:feed :links])
          votes (map (fn [link] (count (:votes link))) links)
@@ -212,10 +211,10 @@
       :dispatch [::re-graph/query
                  queries/search
                  {:filter filter}
-                 [::on-search-links]]}))
+                 [:on-search-links]]}))
 
 (re-frame/reg-event-db
-  ::on-search-links
+  :on-search-links
   (fn [db [_ {:keys [data errors] :as payload}]]
     (let [links (get-in data [:feed :links])]
       (-> db
@@ -237,10 +236,10 @@
                  mutations/post
                  {:url url
                   :description description}
-                 [::on-create-link]]}))
+                 [:on-create-link]]}))
 
 (re-frame/reg-event-fx
- ::on-create-link
+ :on-create-link
  (fn [{:keys [db]} [_ {:keys [data errors] :as payload}]]
      {:db (-> db
               (assoc :loading? false)
@@ -256,16 +255,16 @@
       :dispatch [::re-graph/mutate
                  mutations/vote
                  {:link_id link-id}
-                 [::on-vote-link]]}))
+                 [:on-vote-link]]}))
 
 (re-frame/reg-event-fx
- ::on-vote-link
+ :on-vote-link
  (fn [{:keys [db]} [_ {:keys [data errors] :as payload}]]
    (let [vote-new (:vote data)]
-     {:dispatch [::on-new-vote-db vote-new]})))
+     {:dispatch [:on-new-vote-db vote-new]})))
 
 (re-frame/reg-event-db
-  ::on-new-vote-db
+  :on-new-vote-db
   (fn [db [_ vote-new]]
     (let [links (:new-links db)
           voted? (voted? vote-new links)]
@@ -287,10 +286,10 @@
                  {:email email
                   :password password
                   :name name}
-                 [::on-signup]]}))
+                 [:on-signup]]}))
 
 (re-frame/reg-event-fx
- ::on-signup
+ :on-signup
  (fn [{:keys [db]} [_ {:keys [data errors] :as payload}]]
    (let [token (get-in data [:signup :token])
          authorization (str "Bearer " token)
@@ -314,10 +313,10 @@
                  mutations/login
                  {:email email
                   :password password}
-                 [::on-login]]}))
+                 [:on-login]]}))
 
 (re-frame/reg-event-fx
- ::on-login
+ :on-login
  (fn [{:keys [db]} [_ {:keys [data errors] :as payload}]]
    (let [token (get-in data [:login :token])
          authorization (str "Bearer " token)

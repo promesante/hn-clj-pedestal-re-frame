@@ -9,13 +9,8 @@
 ; Core
 ;-----------------------------------------------------------------------
 
-; (re-frame/reg-sub
-;  ::name
-;  (fn [db]
-;    (:name db)))
-
 (re-frame/reg-sub
- ::active-panel
+ :active-panel
  (fn [db _]
    (:active-panel db)))
 
@@ -47,7 +42,7 @@
 ;-----------------------------------------------------------------------
 
 (re-frame/reg-sub
- ::new-links
+ :new-links
  (fn [db]
    (:new-links db)))
 
@@ -57,11 +52,11 @@
    (:count db)))
 
 (re-frame/reg-sub
- ::top-links
+ :top-links
  (fn [db]
    (:top-links db)))
 
 (re-frame/reg-sub
- ::search-links
+ :search-links
  (fn [db]
    (:search-links db)))
