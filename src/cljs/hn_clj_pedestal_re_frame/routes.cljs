@@ -6,16 +6,18 @@
 (def routes ["/" 
              {"" :home
               "new/" {[:page] :new}
+              "top" :top
               "search" :search
               "create" :create
               "login" :login
-              "top" :top
+              "logout" :logout
               true :not-found}])
 
 (def panel-sufix "-panel")
 (def events {:home #(re-frame/dispatch [:fetch-new-links 1])
              :new #(re-frame/dispatch [:fetch-new-links (:page %)])
-             :top #(re-frame/dispatch [:fetch-top-links])})
+             :top #(re-frame/dispatch [:fetch-top-links])
+             :logout #(re-frame/dispatch [:logout])})
 
 (defn switch-panel [panel-id]
   (let [panel-name (keyword (str (name panel-id) panel-sufix))]

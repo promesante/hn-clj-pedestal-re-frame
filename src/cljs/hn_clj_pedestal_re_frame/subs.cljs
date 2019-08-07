@@ -1,7 +1,8 @@
 (ns hn-clj-pedestal-re-frame.subs
   (:require-macros [reagent.ratom :refer [reaction]])
   (:require
-   [re-frame.core :as re-frame]))
+   [re-frame.core :as re-frame]
+   [hn-clj-pedestal-re-frame.config :as config]))
 
 
 ;-----------------------------------------------------------------------
@@ -29,9 +30,21 @@
    (:error db)))
 
 (re-frame/reg-sub
- :auth?
+ :new?
  (fn [db]
-   (:auth? db)))
+   (:new? db)))
+
+(re-frame/reg-sub
+ :headers
+ (fn [db _]
+   (get-in db config/token-header-path)))
+
+(re-frame/reg-sub
+ :auth?
+ (fn [_]
+   (re-frame/subscribe [:headers]))
+ (fn [headers]
+   (not (nil? headers))))
 
 
 ;-----------------------------------------------------------------------

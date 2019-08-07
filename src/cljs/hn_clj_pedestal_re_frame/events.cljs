@@ -68,7 +68,7 @@
                    [::re-graph/init
                     {:http-parameters
                      {:with-credentials? false
-                      :headers {"Authorization" "Bearer <token>"}}}]
+                      :headers nil}}]
                    [::re-graph/subscribe
                     :subscribe-to-new-links
                     subscriptions/new-link
@@ -173,7 +173,8 @@
      {:db (-> db
               (assoc :loading? false)
               (assoc :new-links links)
-              (assoc :count count))
+              (assoc :count count)
+              (assoc :new? true))
       :dispatch [:set-active-panel :new-panel]})))
 
 (re-frame/reg-event-fx
@@ -200,7 +201,8 @@
                        links-with-votes)]
      {:db (-> db
               (assoc :loading? false)
-              (assoc :top-links ranked-links))
+              (assoc :top-links ranked-links)
+              (assoc :new? false))
       :dispatch [:set-active-panel :top-panel]})))
 
 (re-frame/reg-event-fx
@@ -220,7 +222,8 @@
     (let [links (get-in data [:feed :links])]
       (-> db
           (assoc :loading? false)
-          (assoc :search-links links)))))
+          (assoc :search-links links)
+          (assoc :new? false)))))
 
 
 ;-----------------------------------------------------------------------
@@ -299,9 +302,8 @@
      {:db (-> db
               (assoc :loading? false)
               (assoc-in
-                [:re-graph :re-graph.internals/default :http-parameters :headers]
-                headers)
-              (assoc :auth? true))
+                config/token-header-path
+                headers))
       :dispatch [:navigate :home]
       :set-local-store ["token" token]})))
 
@@ -327,11 +329,10 @@
      {:db (-> db
               (assoc :loading? false)
               (assoc-in
-                [:re-graph :re-graph.internals/default :http-parameters :headers]
-                headers)
-              (assoc :auth? true))
-      :dispatch [:navigate :home]
-      :set-local-store ["token" token]})))
+                config/token-header-path
+                headers))
+      :set-local-store ["token" token]
+      :dispatch [:navigate :home]})))
 
 (re-frame/reg-event-fx
  :logout
@@ -339,4 +340,7 @@
      {:remove-local-store ["token"]
       :db (-> db
               (assoc :loading? false)
-              (assoc :auth? false))}))
+              (assoc-in
+                config/token-header-path
+                nil))
+      :dispatch [:navigate :home]}))

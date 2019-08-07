@@ -3,7 +3,6 @@
    [clojure.string :as str]
    [reagent.core :as reagent]
    [re-frame.core :as re-frame]
-;   [hodgepodge.core :refer [local-storage get-item remove-item]]
    [hn-clj-pedestal-re-frame.routes :as routes]
    [hn-clj-pedestal-re-frame.subs :as subs]
    [hn-clj-pedestal-re-frame.config :as config]
@@ -17,8 +16,7 @@
 (defn header-panel []
   (let [loading? (re-frame/subscribe [:loading?])
         auth? (re-frame/subscribe [:auth?])
-        route (if @auth? "" "login")
-        label (if @auth? "logout" "login")]
+        route (if @auth? "logout" "login")]
     [:div.flex.pa1.justify-between.nowrap.orange
      [:div.flex.flex-fixed.black
       [:div.fw7.mr1 "Hacker News"]
@@ -30,38 +28,42 @@
       [:div.ml1 "|"]
       [:a.ml1.no-underline.black {:href (routes/url-for :create)} "submit"]]
      [:div.flex.flex-fixed
-      [:a.ml1.no-underline.black {:href (str "/" route)} label]]]))
+      [:a.ml1.no-underline.black {:href (str "/" route)} route]]]))
 
 
 ;-----------------------------------------------------------------------
 ; Utils
 ;-----------------------------------------------------------------------
 
-(defn parse-page []
-  (let [path-name js/window.location.pathname
-        path-elems (str/split path-name #"/")
-        path-length (count path-elems)]
-    (if (and (= path-length 3) (= "new" (get path-elems 1)))
-      (js/parseInt (get path-elems 2))
-      1)))
+; (defn parse-page []
+;   (let [path-name js/window.location.pathname
+;         path-elems (str/split path-name #"/")
+;         path-length (count path-elems)]
+;     (if (and (= path-length 3) (= "new" (get path-elems 1)))
+;       (js/parseInt (get path-elems 2))
+;       1)))
 
-(defn parse-path []
-  (let [path-name js/window.location.pathname
-        path-elems (str/split path-name #"/")
-        path (get path-elems 1)]
-    path))
+; (defn parse-path []
+;   (let [path-name js/window.location.pathname
+;         path-elems (str/split path-name #"/")
+;         path (get path-elems 1)]
+;     path))
 
 (defn link-record []
   (fn [idx link]
     (let [{:keys [id created_at description url posted_by votes]} link
           link-id (js/parseInt id)
           auth? (re-frame/subscribe [:auth?])
+          new? (re-frame/subscribe [:new?])
           time-diff (utils/time-diff-for-date created_at)
-          new? (or (nil? (parse-path)) (= "new" (parse-path)))]
+;          path (parse-path)
+;          path-new? (or (nil? path) (= "new" path))
+;          new? (reagent/atom path-new?)
+          ]
       [:div.flex.mt2.items-start
        [:div.flex.items-center
         [:span.gray (str (inc idx) ".")]
-        (when (and @auth? new?)
+        (when (and @auth? @new?)
           [:div.f6.lh-copy.gray
            {:on-click #(re-frame/dispatch [:vote-link link-id])} "▲"])
         [:div.ml1
@@ -165,8 +167,7 @@
                    (when-not (or (empty? @email) (empty? @password))
                      (re-frame/dispatch [:login @email @password])
                      (reset! email "")
-                     (reset! password "")))
-        ]
+                     (reset! password "")))]
     (fn []
       [:div
        [:h4 {:class "mv3"} (if @login "Login" "Sign Up")]
@@ -178,7 +179,7 @@
         [:input.mb2 {:type "text"
                      :placeholder "Your email address"
                      :on-change #(reset! email (-> % .-target .-value))}]
-        [:input.mb2 {:type "text"
+        [:input.mb2 {:type "password"
                      :placeholder "Choose a safe password"
                      :on-change #(reset! password (-> % .-target .-value))}]
         [:span.input-group-btn
