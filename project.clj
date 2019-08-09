@@ -16,7 +16,7 @@
                  [hodgepodge "0.1.3"]
                  [reagent "0.7.0"]
                  [re-frame "0.10.5"]
-                 [re-graph "0.1.9-SNAPSHOT"]]
+                 [re-graph "0.1.8-HN"]]
 
   :plugins [[lein-cljsbuild "1.1.7"]]
 
