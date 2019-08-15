@@ -138,7 +138,7 @@ In the corresponding shell sessions mentioned in the previous section:
 
 * Front-end:
 
-````shell
+```shell
 dev:cljs.user=> :cljs/quit
 $
 ```
