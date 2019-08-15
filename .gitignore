@@ -10,3 +10,4 @@ out
 .rebel_readline_history
 *.DS_Store
 /logs
+*.html
