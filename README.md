@@ -33,7 +33,7 @@ INSERT 0 3
 
 Checking database has been setup right:
 
-```shell
+```bash
 $ psql -h localhost -U hn_role hndb
 psql (11.4)
 Type "help" for help.
