@@ -13,7 +13,7 @@ Database engine used is Postgresql.
 
 Database setup is performed by setup-db.sh script in the bin directory:
 
-```shell
+```
 $ ./setup-db.sh
 create user hn_role password 'lacinia';
 CREATE ROLE
@@ -73,7 +73,7 @@ In two different shell sessions:
 
  * Front-end:
 
-```shell
+```
 $ lein clean
 $ lein figwheel
 Figwheel: Cutting some fruit, just a sec ...
@@ -111,7 +111,7 @@ dev:cljs.user=>
 
 * Back-end:
 
-```shell
+```
 $ lein repl
 Retrieving cider/piggieback/0.4.0/piggieback-0.4.0.pom from clojars
 Retrieving cider/piggieback/0.4.0/piggieback-0.4.0.jar from clojars
@@ -139,14 +139,14 @@ In the corresponding shell sessions mentioned in the previous section:
 
 * Front-end:
 
-```shell
+```
 dev:cljs.user=> :cljs/quit
 $
 ```
 
 * Back-end:
 
-```shell
+```
 user=> (stop)
 user=> (quit)
 Bye for now!
