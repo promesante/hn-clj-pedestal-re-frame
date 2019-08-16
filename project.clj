@@ -37,7 +37,7 @@
                    [day8.re-frame/tracing "0.5.1"]
                    [figwheel-sidecar "0.5.16"]
                    [cider/cider-nrepl "0.16.0"]
-                   [cider/piggieback "0.3.7"]
+                   [cider/piggieback "0.4.0"]
                    [re-frisk "0.5.3"]]
 
     :plugins      [[lein-figwheel "0.5.16"]]}
