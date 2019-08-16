@@ -51,6 +51,7 @@ hndb=> select * from link;
   1 | INIT - Prisma turns your database into a GraphQL API | https://www.prismagraphql.com             |      1 | 2019-08-14 16:22:03.514718 | 2019-08-14 16:22:03.514718
   2 | INIT - The best GraphQL client                       | https://www.apollographql.com/docs/react/ |      2 | 2019-08-14 16:22:03.514718 | 2019-08-14 16:22:03.514718
 (2 rows)
+
 ```
 
 
