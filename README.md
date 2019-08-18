@@ -67,6 +67,38 @@ In order to implement GraphQL subscriptions, I've had the following to issues:
 To be able to go on, for each of them, I've implemented the workarounds depicted in the issues just above, and shared them in my own [fork][re-graph-fork] of re-graph. In this fork, each of those workarounds has its own commit. Hence, re-graph dependency in this project references this fork. As its JAR file is not available online, in order to have this dependency resolved, this fork should be cloned and installed locally, running `lein install` in the cloned fork's root directory.
 
 
+### GraphiQL ###
+
+On the server side, ["The Fullstack Tutorial for GraphQL"](https://www.howtographql.com) is based on [graphql-yoga](https://github.com/prisma/graphql-yoga) which, in turn, comes with [GraphQL Playground](https://github.com/prisma/graphql-playground) out of the box, as its “GraphQL IDE”.
+
+On the other hand, [Lacinia Pedestal](https://github.com/walmartlabs/lacinia-pedestal) comes with [GraphiQL](https://github.com/graphql/graphiql).
+
+When you need to access queries or mutations which require the user to be authenticated, whereas [GraphQL Playground](https://github.com/prisma/graphql-playground) lets you set the corresponding token in the IDE, [GraphiQL](https://github.com/graphql/graphiql) takes it as a configuration.
+
+Furthermore, [Lacinia Pedestal](https://github.com/walmartlabs/lacinia-pedestal) lets you set it as part of its own configuration, and hands it over to [GraphiQL](https://github.com/graphql/graphiql), in [server.clj](https://github.com/promesante/hn-clj-pedestal-re-frame/blob/master/src/clj/hn_clj_pedestal_re_frame/server.clj) as `:ide-headers`, as shown below:
+
+```clojure
+(defrecord Server [schema-provider server port]
+
+  component/Lifecycle
+  (start [this]
+    (assoc this :server (-> schema-provider
+                            :schema
+                            (lp/service-map
+                             {:graphiql true
+                              :ide-path "/graphiql"
+                              :port port
+                              :subscriptions true
+                              :ide-headers {:authorization "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyLWlkIjozfQ.JH0Q2flkonyDPk_yiSrTK5VSKrbrsdR0FEePMgiEwDE"}
+                              })
+                            (merge {::http/resource-path "/public"})
+                            (add-route)
+                            http/create-server
+                            http/start)))
+```
+
+
+
 ### Starting Up ###
 
 In two different shell sessions:
@@ -131,7 +163,7 @@ user=> (start)
 :started
 user=> 
 ```
-The application will autommatically served in the last window of the browser you have last used.
+The application will be autommatically served in the last window of the browser you have last used.
 
 ### Shutting Down ###
 

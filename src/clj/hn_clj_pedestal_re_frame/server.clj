@@ -30,12 +30,13 @@
   (start [this]
     (assoc this :server (-> schema-provider
                             :schema
-                            (lp/service-map {:graphiql true
-                                             :ide-path "/graphiql"
-                                             :port port
-                                             :subscriptions true
-                                             ; :subscriptions-path "/ws"
-                                             })
+                            (lp/service-map
+                             {:graphiql true
+                              :ide-path "/graphiql"
+                              :port port
+                              :subscriptions true
+                              :ide-headers {:authorization "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyLWlkIjozfQ.JH0Q2flkonyDPk_yiSrTK5VSKrbrsdR0FEePMgiEwDE"}
+                              })
                             (merge {::http/resource-path "/public"})
                             (add-route)
                             http/create-server

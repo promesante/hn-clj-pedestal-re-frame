@@ -3,6 +3,7 @@
                  [org.clojure/clojurescript "1.10.238"]
                  [com.stuartsierra/component "0.3.2"]
                  [com.walmartlabs/lacinia-pedestal "0.10.0"]
+;                 [com.walmartlabs/lacinia-pedestal "0.10.0-SNAPSHOT"]
                  [org.postgresql/postgresql "42.2.5.jre7"]
                  [com.mchange/c3p0 "0.9.5.2"]
                  [io.aviso/logging "0.3.1"]
@@ -16,7 +17,9 @@
                  [hodgepodge "0.1.3"]
                  [reagent "0.7.0"]
                  [re-frame "0.10.5"]
-                 [re-graph "0.1.8-HN"]]
+                 [re-graph "0.1.8-HN"]
+;                 [re-graph "0.1.9-SNAPSHOT"]
+                 ]
 
   :plugins [[lein-cljsbuild "1.1.7"]]
 
