@@ -14,6 +14,8 @@ I have tried to match each of the articles in the series in the git commit seque
     * [re-frame docs](https://github.com/Day8/re-frame/blob/master/docs/README.md)
 	* [re-frame tutorial](https://purelyfunctional.tv/guide/re-frame-building-blocks/)
 
+Instructions below assume having read these reference documents.
+
 ## Setup
 
 ### Database
