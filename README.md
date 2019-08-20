@@ -1,9 +1,18 @@
 # hn-clj-pedestal-re-frame
 
-Porting ["The Fullstack Tutorial for GraphQL"](https://www.howtographql.com), from Javascript to Clojure(script).
+Porting ["The Fullstack Tutorial for GraphQL"](https://www.howtographql.com), from Javascript to Clojure/script.
 
 I have tried to match each of the articles in the series in the git commit sequence, and the description given to each of them.
 
+
+## References ##
+
+* Port source: ["The Fullstack Tutorial for GraphQL"](https://www.howtographql.com)
+* Port target
+  - Back-end: [Lacinia Pedestal Tutorial](https://lacinia.readthedocs.io/en/latest/tutorial/)
+  - Front-end:
+    * [re-frame docs](https://github.com/Day8/re-frame/blob/master/docs/README.md)
+	* [re-frame tutorial](https://purelyfunctional.tv/guide/re-frame-building-blocks/)
 
 ## Setup
 
@@ -184,7 +193,57 @@ user=> (quit)
 Bye for now!
 ```
 
+## Usage ##
 
+The only non obvious functionalities are the ones implemented by means of GraphQL subscriptions: as a new link is submitted, or one already existing is voted for, those events are notified to every client.
+
+You can replicate these cases by means of GraphiQL, the GraphQL IDE supplied out of the box with Lacinia Pedestal, mentioned above, in the Setup section. Accessing it in a different tab, you can get the token mentioned there for configuration as you signup a new user, or login, in your browser's developer tools -> Application -> Local Storage -> "token" entry.
+
+A couple seconds after running each of these mutations, the new link or vote will appear in the Hacker News application.
+
+GraphQL mutations:
+
+New Link:
+
+```graphql
+mutation post($url:String!, $description:String!) {
+    post(
+      url: $url,
+      description: $description
+    ) {
+      id
+    }
+  }
+```
+
+Parameters:
+
+```json
+{
+  "url": "https://simulacrum.party/posts/the-mutable-web/",
+  "description": "The Mutable Web"
+}
+```
+
+Vote:
+
+```graphql
+mutation vote($link_id:ID!) {
+    vote(
+      link_id: $link_id
+    ) {
+      id
+    }
+  }
+```
+  
+Parameter:
+
+```json
+{
+  "link_id": 2
+}
+```
 
 [re-graph]: https://github.com/oliyh/re-graph "re-graph"
 
