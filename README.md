@@ -80,7 +80,7 @@ To be able to go on, for each of them, I've implemented the workarounds depicted
 
 On the server side, ["The Fullstack Tutorial for GraphQL"](https://www.howtographql.com) is based on [graphql-yoga](https://github.com/prisma/graphql-yoga) which, in turn, comes with [GraphQL Playground](https://github.com/prisma/graphql-playground) out of the box, as its “GraphQL IDE”.
 
-On the other hand, [Lacinia Pedestal](https://github.com/walmartlabs/lacinia-pedestal) comes with [GraphiQL](https://github.com/graphql/graphiql).
+On the other hand, [Lacinia Pedestal](https://github.com/walmartlabs/lacinia-pedestal) comes with [GraphiQL](https://github.com/graphql/graphiql). So, we will use GraphiQL.
 
 When you need to access queries or mutations which require the user to be authenticated, whereas [GraphQL Playground](https://github.com/prisma/graphql-playground) lets you set the corresponding token in the IDE, [GraphiQL](https://github.com/graphql/graphiql) takes it as a configuration.
 
@@ -195,11 +195,23 @@ Bye for now!
 
 ## Usage ##
 
-The only non obvious functionalities are the ones implemented by means of GraphQL subscriptions: as a new link is submitted, or one already existing is voted for, those events are notified to every client.
+The only not obvious functionalities are the ones implemented by means of GraphQL subscriptions:
 
-You can replicate these cases by means of GraphiQL, the GraphQL IDE supplied out of the box with Lacinia Pedestal, mentioned above, in the Setup section. Accessing it in a different tab, you can get the token mentioned there for configuration as you signup a new user, or login, in your browser's developer tools -> Application -> Local Storage -> "token" entry.
+* new link submitted
+* voting an already existing link
 
-A couple seconds after running each of these mutations, the new link or vote will appear in the Hacker News application.
+Those events are notified to every client by means of a GraphQL subscription.
+
+You can replicate these cases by means of GraphiQL, the GraphQL IDE supplied out of the box with Lacinia Pedestal, mentioned above, in the Setup section.
+
+You can access the back-end from two different tabs in your browser:
+
+* the application: `http://localhost:8888`
+* GraphiQL: `http://localhost:8888/graphiql`
+
+The latter should have been setup as depicted above. You can get the token mentioned there for configuration in the application: as you signup a new user, or login, in the browser's developer tools -> Application -> Local Storage -> "token" entry.
+
+A couple seconds after running each of these mutations in GraphiQL, the new link or vote will appear in the Hacker News application.
 
 GraphQL mutations:
 
