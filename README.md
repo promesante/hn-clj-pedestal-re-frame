@@ -4,6 +4,8 @@ Porting ["The Fullstack Tutorial for GraphQL"](https://www.howtographql.com), fr
 
 I have tried to match each of the articles in the series in the git commit sequence, and the description given to each of them.
 
+More information to be shared in my [blog](https://promesante.github.io/2019/08/14/clojure_graphql_fullstack_learning_project_part_1.html).
+
 
 ## References ##
 
@@ -22,7 +24,7 @@ Instructions below assume having read these reference documents.
 
 Database engine used is Postgresql.
 
-Database setup is performed by setup-db.sh script in the bin directory:
+Database setup is performed by `setup-db.sh` script in the `bin` directory:
 
 ```
 $ ./setup-db.sh
@@ -75,7 +77,7 @@ In order to implement GraphQL subscriptions, I've had the following to issues:
   * [Subscription to Lacinia Pedestal back end: Getting just the first event][re-graph-issue1]
   * [Queries and Mutations: websockets or HTTP?][re-graph-issue2]
 
-To be able to go on, for each of them, I've implemented the workarounds depicted in the issues just above, and shared them in my own [fork][re-graph-fork] of re-graph. In this fork, each of those workarounds has its own commit. Hence, re-graph dependency in this project references this fork. As its JAR file is not available online, in order to have this dependency resolved, this fork should be cloned and installed locally, running `lein install` in the cloned fork's root directory.
+To be able to go on, for each of them, I've implemented the workarounds depicted in those issues, and shared in my own [fork][re-graph-fork] of re-graph. In this fork, each of those workarounds has its own commit. Hence, re-graph dependency in this project references this fork. As its JAR file is not available online, in order to have this dependency resolved, this fork should be cloned and installed locally, running `lein install` in the cloned fork's root directory.
 
 
 ### GraphiQL ###
