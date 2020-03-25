@@ -15,13 +15,21 @@
   (html-response
    (slurp (io/resource "public/index.html"))))
 
+(def index-page* index-page)
+
 (def root-route
-  ["/" :get `index-page])
+  [["/" :get `index-page]
+   ["/new/*"  :get `index-page :route-name :new]
+   ["/top"    :get `index-page :route-name :top]
+   ["/search" :get `index-page :route-name :search]
+   ["/create" :get `index-page :route-name :create]
+   ["/login"  :get `index-page :route-name :login]
+   ["/logout" :get `index-page :route-name :logout]])
 
 (defn add-route
   [service-map]
   (let [{routes ::http/routes} service-map
-        ext-routes (conj routes root-route)]
+        ext-routes (into routes root-route)]
     (assoc service-map ::http/routes ext-routes)))
 
 (defrecord Server [schema-provider server port]
