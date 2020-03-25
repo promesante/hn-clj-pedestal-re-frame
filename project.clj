@@ -1,6 +1,7 @@
 (defproject hn-clj-pedestal-re-frame "0.1.0-SNAPSHOT"
   :dependencies [[org.clojure/clojure "1.9.0"]
                  [org.clojure/clojurescript "1.10.238"]
+                 [org.clojure/core.async "1.0.567"]
                  [com.stuartsierra/component "0.3.2"]
                  [com.walmartlabs/lacinia-pedestal "0.13.0"]
                  [org.postgresql/postgresql "42.2.5.jre7"]
