@@ -17,7 +17,7 @@
                  [hodgepodge "0.1.3"]
                  [reagent "0.7.0"]
                  [re-frame "0.10.5"]
-                 [re-graph "0.1.8-HN"]
+                 [re-graph "0.1.9"]
 ;                 [re-graph "0.1.9-SNAPSHOT"]
                  ]
 
