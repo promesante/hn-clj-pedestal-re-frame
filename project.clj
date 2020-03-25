@@ -12,7 +12,7 @@
                  [com.andrewmcveigh/cljs-time "0.5.2"]
                  [kibu/pushy "0.3.8"]
                  [bidi "2.1.2"]
-                 [reagi "0.10.1"]
+                 [reagi "0.10.1" :exclusions [org.clojure/clojure]]
                  [yesql "0.5.3"]
                  [hodgepodge "0.1.3"]
                  [reagent "0.7.0"]
