@@ -4,6 +4,7 @@
                  [org.clojure/core.async "1.0.567"]
                  [com.stuartsierra/component "0.3.2"]
                  [com.walmartlabs/lacinia-pedestal "0.13.0"]
+                 [ring/ring-jetty-adapter "1.8.0"]
                  [org.postgresql/postgresql "42.2.5.jre7"]
                  [com.mchange/c3p0 "0.9.5.2"]
                  [io.aviso/logging "0.3.1"]
