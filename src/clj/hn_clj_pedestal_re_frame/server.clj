@@ -2,7 +2,9 @@
   (:require [com.stuartsierra.component :as component]
             [clojure.java.io :as io]
             [com.walmartlabs.lacinia.pedestal :as lp]
-            [io.pedestal.http :as http]))
+            [io.pedestal.http :as http]
+            [io.pedestal.http.ring-middlewares :as middlewares]
+            [ring.middleware.session.cookie :as cookie]))
 
 (defn html-response
   [html]
@@ -15,7 +17,27 @@
   (html-response
    (slurp (io/resource "public/index.html"))))
 
-(def index-page* index-page)
+
+(def user-info-interceptor
+  {:name ::user-info
+   :enter
+   (fn [{:keys [request] :as context}]
+    ;; Retrieve information from for example the request
+    (assoc-in context [:request :lacinia-app-context :custom-user-info-key] request))})
+
+(defn- inject-session-interceptor [interceptors]
+  (let [session-interceptor (middlewares/session {:store (cookie/cookie-store)})]
+    (lp/inject interceptors user-info-interceptor :after ::lp/inject-app-context)))
+
+(defn- inject-user-info-interceptor [interceptors]
+  (lp/inject interceptors user-info-interceptor :after ::lp/inject-app-context))
+
+(defn- interceptors [schema]
+  (let [options {}
+        default-interceptors (lp/default-interceptors schema options)]
+    (-> default-interceptors
+        (inject-session-interceptor)
+        (inject-user-info-interceptor))))
 
 (def root-route
   [["/" :get `index-page]
@@ -43,6 +65,7 @@
                               :ide-path "/graphiql"
                               :port port
                               :subscriptions true
+                              :interceptors (interceptors (-> schema-provider :schema))
                               :ide-headers {:authorization "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyLWlkIjozfQ.JH0Q2flkonyDPk_yiSrTK5VSKrbrsdR0FEePMgiEwDE"}
                               })
                             (merge {::http/resource-path "/public"})
