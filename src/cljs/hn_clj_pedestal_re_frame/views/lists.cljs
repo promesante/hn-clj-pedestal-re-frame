@@ -64,7 +64,7 @@
         last (quot @count config/new-links-per-page)]
     [:div
      (when @auth? [:div ""])
-     (map-indexed (link-record) @links)
+     (into [:div] (map-indexed (link-record) @links))
      [:div.flex.ml4.mv3.gray
       (when (> page 1)
         [:a.ml1.no-underline.gray

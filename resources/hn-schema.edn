@@ -2,7 +2,7 @@
  {:Link
   {:description "A link posted to Hacker News"
    :fields
-   {:id {:type (non-null ID)}
+   {:id {:type (non-null Int)}
     :created_at {:type (non-null String)
                  :description "Link creation datetime"}
     :description {:type (non-null String)
@@ -21,7 +21,7 @@
   :User
   {:description "User posting links to Hacker News"
    :fields
-   {:id {:type (non-null ID)}
+   {:id {:type (non-null Int)}
     :name {:type (non-null String)
            :description "User's name"}
     :email {:type (non-null String)
@@ -46,7 +46,7 @@
   :Vote
   {:description "A vote for a link submitted to Hacker News"
    :fields
-   {:id {:type (non-null ID)}
+   {:id {:type (non-null Int)}
     :link {:type :Link
            :description "Voted link"}
     :user {:type :User
@@ -130,7 +130,7 @@
    :description "User voting"
    :args
    {
-    :link_id {:type (non-null ID)
+    :link_id {:type (non-null Int)
               :description "User's email"}
     }
    :resolve :mutation/vote!}

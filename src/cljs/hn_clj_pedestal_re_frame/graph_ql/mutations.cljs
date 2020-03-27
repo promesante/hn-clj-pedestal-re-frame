@@ -11,7 +11,7 @@
   }")
 
 (def vote
-  "vote($link_id:ID!) {
+  "vote($link_id:Int!) {
     vote(
       link_id: $link_id
     ) {

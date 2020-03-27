@@ -165,11 +165,23 @@
      :Link/votes (link-votes db)
      :User/links (user-links db)}))
 
+;; TODO: REPLACE WHEN CLEARER EXACTLY WHAT THIS DOES
+(defn- stream-pets [context args source-stream]
+  (let [{:keys [count]} args
+        runnable ^Runnable (fn []
+                             (println :stream-pets-fn args)
+                             (when args
+                               (dotimes [i count]
+                                 (source-stream {:i i}))))
+        streamer (Thread. runnable "stream-pets-thread")]
+    (.start streamer)
+    #(.stop streamer)))
+
 (defn streamer-map
  [component]
   (let [db (:db component)]
-    {:subscription/new-link (new-link db)
-     :subscription/new-vote (new-vote db)}))
+    {:subscription/new-link stream-pets #_(new-link db)
+     :subscription/new-vote stream-pets #_(new-vote db)}))
 
 (defn load-schema
   [component]
